@@ -1,3 +1,3 @@
 all:
-	g++ -o snake src/main.cpp src/snakeGame.cpp -lncurses
+	g++ -o snake src/fmain.cpp src/fsnakeGame.cpp -lncurses
 	./snake
