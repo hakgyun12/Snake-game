@@ -97,7 +97,7 @@ void snakeGame::DrawWindow()
 // draw snake's body
 void snakeGame::DrawSnake()
 {
-    for (int32 i = 0; i < 5; i++)
+    for (int32 i = 0; i < 3; i++)
     {
         snake.push_back(CharPosition(30 + i, 10));
     }
@@ -181,7 +181,7 @@ bool snakeGame::FatalCollision()
         }
     }
 
-    if (snake.size() == 3)
+    if (snake.size() < 3)
     {
         return true;
     }
