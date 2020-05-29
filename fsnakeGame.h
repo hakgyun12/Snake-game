@@ -19,12 +19,13 @@ struct CharPosition
 class snakeGame
 {
 private:
-    int32 score, del, maxwidth, maxheight;
+    int32 speed, speedChange, maxwidth, maxheight;
     char direction, partchar, edgechar, fruitchar, poisonchar;
     // partchar is the character representing the snake's body
     // edgechar is the character representing the edge of the game window
     // fruitchar is the character representing the fruit
     // del stands for delay
+    int scoreGrowthItem, scorePoisonItem, scoreGate, currentLength, maxLength;
     bool bEatsFruit, bEatsPoison;
     CharPosition fruit, poison;      // need to clarify this combination
     std::vector<CharPosition> snake; // represent the snake's body

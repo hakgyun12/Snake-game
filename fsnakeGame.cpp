@@ -23,14 +23,19 @@ snakeGame::snakeGame()
     // variables initialisation:
     partchar = 'x';       // character to represent the snake
     edgechar = (char)219; // full rectangle on the key table
-    fruitchar = '*';
-    poisonchar = '?';
+    fruitchar = '+';
+    poisonchar = '-';
     fruit.x = 0;
     fruit.y = 0;
     poison.x = 0;
     poison.y = 0;
-    score = 0;
-    del = 70000;
+    currentLength = 3;
+    maxLength = 3;
+    scoreGrowthItem = 0;
+    scorePoisonItem = 0;
+    scoreGate = 0;
+    speed = 70000;
+    speedChange = 50000;
     bool bEatsFruit = 0;
     bool bEatsPoison = 0;
     direction = 'l';
@@ -113,9 +118,16 @@ void snakeGame::DrawSnake()
 // print score at bottom of window
 void snakeGame::PrintScore()
 {
-    move(0, maxwidth - 10);
-    printw("Score: %d", score);
-    return;
+    move(0, maxwidth - 11);
+    printw("Score Board");
+    move(1, maxwidth - 11);
+    printw("B:(%d)/(%d)", currentLength, maxLength);
+    move(2, maxwidth - 11);
+    printw("+:(%d)", scoreGrowthItem);
+    move(3, maxwidth - 11);
+    printw("-:(%d)", scorePoisonItem);
+    move(4, maxwidth - 11);
+    printw("G:(%d)", scoreGate);
 }
 
 // position a new fruit in the game window
@@ -211,7 +223,12 @@ bool snakeGame::GetsFruit()
     if (snake[0].x == fruit.x && snake[0].y == fruit.y)
     {
         PositionFruit();
-        score += 10;
+        currentLength++;
+        if (currentLength > maxLength)
+        {
+            maxLength = currentLength;
+        }
+        scoreGrowthItem++;
         PrintScore();
         return bEatsFruit = true;
     }
@@ -225,7 +242,8 @@ bool snakeGame::GetsPoison()
     if (snake[0].x == poison.x && snake[0].y == poison.y)
     {
         PositionPoison();
-        score -= 10;
+        currentLength--;
+        scorePoisonItem++;
         PrintScore();
         return bEatsPoison = true;
     }
@@ -343,6 +361,6 @@ void snakeGame::PlayGame()
             break;
         }
 
-        usleep(del); // delay
+        usleep(speed); // delay
     }
 }
