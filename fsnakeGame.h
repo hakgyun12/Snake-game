@@ -19,7 +19,7 @@ struct CharPosition
 class snakeGame
 {
 private:
-    int32 speed, speedChange, maxwidth, maxheight;
+    int32 speed, itemChange, maxwidth, maxheight;
     char direction, partchar, edgechar, fruitchar, poisonchar;
     // partchar is the character representing the snake's body
     // edgechar is the character representing the edge of the game window

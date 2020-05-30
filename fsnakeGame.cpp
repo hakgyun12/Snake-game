@@ -21,8 +21,8 @@ CharPosition::CharPosition()
 snakeGame::snakeGame()
 {
     // variables initialisation:
-    partchar = 'x';       // character to represent the snake
-    edgechar = (char)219; // full rectangle on the key table
+    partchar = 'x'; // character to represent the snake
+    edgechar = 'o'; // full rectangle on the key table
     fruitchar = '+';
     poisonchar = '-';
     fruit.x = 0;
@@ -35,7 +35,7 @@ snakeGame::snakeGame()
     scorePoisonItem = 0;
     scoreGate = 0;
     speed = 70000;
-    speedChange = 50000;
+    itemChange = 500000;
     bool bEatsFruit = 0;
     bool bEatsPoison = 0;
     direction = 'l';
@@ -75,26 +75,46 @@ void snakeGame::DrawWindow()
 {
     for (int32 i = 0; i < maxwidth - 12; i++) // draws top
     {
+        start_color();
+        init_pair(3, COLOR_WHITE, COLOR_WHITE);
+        attron(COLOR_PAIR(3));
         move(0, i);
         addch(edgechar);
+        attroff(COLOR_PAIR(3));
+        refresh();
     }
 
     for (int32 i = 0; i < maxwidth - 12; i++) // draws bottom
     {
+        start_color();
+        init_pair(3, COLOR_WHITE, COLOR_WHITE);
+        attron(COLOR_PAIR(3));
         move(maxheight - 1, i);
         addch(edgechar);
+        attroff(COLOR_PAIR(3));
+        refresh();
     }
 
     for (int32 i = 0; i < maxheight - 1; i++) // draws left side
     {
+        start_color();
+        init_pair(3, COLOR_WHITE, COLOR_WHITE);
+        attron(COLOR_PAIR(3));
         move(i, 0);
         addch(edgechar);
+        attroff(COLOR_PAIR(3));
+        refresh();
     }
 
     for (int32 i = 0; i < maxheight; i++) // draws right side
     {
+        start_color();
+        init_pair(3, COLOR_WHITE, COLOR_WHITE);
+        attron(COLOR_PAIR(3));
         move(i, maxwidth - 12);
         addch(edgechar);
+        attroff(COLOR_PAIR(3));
+        refresh();
     }
     return;
 }
@@ -146,11 +166,15 @@ void snakeGame::PositionFruit()
         {
             fruit.x = tmpx;
             fruit.y = tmpy;
-            continue; // if true, ignore the following and go back to the beginning of function
+            // if true, ignore the following and go back to the beginning of function
         }
     }
+    start_color();
+    init_pair(1, COLOR_WHITE, COLOR_GREEN);
+    attron(COLOR_PAIR(1));
     move(fruit.y, fruit.x);
     addch(fruitchar);
+    attroff(COLOR_PAIR(1));
     refresh();
 }
 void snakeGame::PositionPoison()
@@ -167,11 +191,14 @@ void snakeGame::PositionPoison()
         {
             poison.x = tmpx1;
             poison.y = tmpy1;
-            continue; // if true, ignore the following and go back to the beginning of function
         }
     }
+    start_color();
+    init_pair(2, COLOR_WHITE, COLOR_RED);
+    attron(COLOR_PAIR(2));
     move(poison.y, poison.x);
     addch(poisonchar);
+    attroff(COLOR_PAIR(2));
     refresh();
 }
 
@@ -349,6 +376,7 @@ void snakeGame::PlayGame()
         {
             move((maxheight - 2) / 2, (maxwidth - 5) / 2);
             printw("GAME OVER");
+            endwin();
             break;
         }
 
