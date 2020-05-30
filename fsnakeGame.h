@@ -25,7 +25,7 @@ private:
     // edgechar is the character representing the edge of the game window
     // fruitchar is the character representing the fruit
     // del stands for delay
-    int scoreGrowthItem, scorePoisonItem, scoreGate, currentLength, maxLength;
+    int scoreGrowthItem, scorePoisonItem, scoreGate, currentLength, maxLength, fruitTimer, poisonTimer;
     bool bEatsFruit, bEatsPoison;
     CharPosition fruit, poison;      // need to clarify this combination
     std::vector<CharPosition> snake; // represent the snake's body
@@ -40,6 +40,8 @@ private:
     void MoveSnake();
     bool GetsFruit();
     bool GetsPoison();
+    void fruitTime();
+    void poisonTime();
 
 public:
     snakeGame();

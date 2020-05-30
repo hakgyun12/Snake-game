@@ -35,10 +35,12 @@ snakeGame::snakeGame()
     scorePoisonItem = 0;
     scoreGate = 0;
     speed = 70000;
-    itemChange = 500000;
+    itemChange = 80;
     bool bEatsFruit = 0;
     bool bEatsPoison = 0;
     direction = 'l';
+    fruitTimer = 0;
+    poisonTimer = 0;
     srand(time(NULL));
 
     InitGameWindow();
@@ -177,6 +179,17 @@ void snakeGame::PositionFruit()
     attroff(COLOR_PAIR(1));
     refresh();
 }
+void snakeGame::fruitTime()
+{
+    fruitTimer++;
+    if (fruitTimer % itemChange == 0)
+    {
+        move(fruit.y, fruit.x);
+        printw(" ");
+        PositionFruit();
+        fruitTimer = 0;
+    }
+}
 void snakeGame::PositionPoison()
 {
     int32 tmpx1 = rand() % (maxwidth - 13) + 1; // +1 to avoid the 0
@@ -200,6 +213,17 @@ void snakeGame::PositionPoison()
     addch(poisonchar);
     attroff(COLOR_PAIR(2));
     refresh();
+}
+void snakeGame::poisonTime()
+{
+    poisonTimer++;
+    if (poisonTimer % itemChange == 0)
+    {
+        move(poison.y, poison.x);
+        printw(" ");
+        PositionPoison();
+        poisonTimer = 0;
+    }
 }
 
 // set game over situations
@@ -249,6 +273,7 @@ bool snakeGame::GetsFruit()
 {
     if (snake[0].x == fruit.x && snake[0].y == fruit.y)
     {
+        fruitTimer = 0;
         PositionFruit();
         currentLength++;
         if (currentLength > maxLength)
@@ -268,6 +293,7 @@ bool snakeGame::GetsPoison()
 {
     if (snake[0].x == poison.x && snake[0].y == poison.y)
     {
+        poisonTimer = 0;
         PositionPoison();
         currentLength--;
         scorePoisonItem++;
@@ -382,6 +408,8 @@ void snakeGame::PlayGame()
 
         GetsFruit();
         GetsPoison();
+        fruitTime();
+        poisonTime();
         MoveSnake();
 
         if (direction == 'q') //exit
