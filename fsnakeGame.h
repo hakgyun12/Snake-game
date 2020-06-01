@@ -7,19 +7,18 @@
 #ifndef SNAKEGAME_H
 #define SNAKEGAME_H
 // Unreal standards
-using int32 = int;
 
 struct CharPosition
 {
-    int32 x, y;
-    CharPosition(int32 col, int32 row);
+    int x, y;
+    CharPosition(int col, int row);
     CharPosition();
 };
 
 class snakeGame
 {
 private:
-    int32 speed, itemChange, maxwidth, maxheight;
+    int speed, itemChange, maxwidth, maxheight;
     char direction, partchar, edgechar, fruitchar, poisonchar;
     // partchar is the character representing the snake's body
     // edgechar is the character representing the edge of the game window

@@ -4,9 +4,9 @@
 using namespace std;
 
 // Unreal coding standards
-using int32 = int;
-int32 KeyPressed;
-CharPosition::CharPosition(int32 col, int32 row)
+
+int KeyPressed;
+CharPosition::CharPosition(int col, int row)
 {
     x = col;
     y = row;
@@ -35,7 +35,7 @@ snakeGame::snakeGame()
     scorePoisonItem = 0;
     scoreGate = 0;
     speed = 70000;
-    itemChange = 80;
+    itemChange = 80; // 뱀이 아무것도 먹지 않을 때 아이템 위치가 대기하는 시간
     bool bEatsFruit = 0;
     bool bEatsPoison = 0;
     direction = 'l';
@@ -75,7 +75,7 @@ void snakeGame::InitGameWindow()
 // draw the game window
 void snakeGame::DrawWindow()
 {
-    for (int32 i = 0; i < maxwidth - 12; i++) // draws top
+    for (int i = 0; i < maxwidth - 12; i++) // draws top
     {
         start_color();
         init_pair(3, COLOR_WHITE, COLOR_WHITE);
@@ -86,7 +86,7 @@ void snakeGame::DrawWindow()
         refresh();
     }
 
-    for (int32 i = 0; i < maxwidth - 12; i++) // draws bottom
+    for (int i = 0; i < maxwidth - 12; i++) // draws bottom
     {
         start_color();
         init_pair(3, COLOR_WHITE, COLOR_WHITE);
@@ -97,7 +97,7 @@ void snakeGame::DrawWindow()
         refresh();
     }
 
-    for (int32 i = 0; i < maxheight - 1; i++) // draws left side
+    for (int i = 0; i < maxheight - 1; i++) // draws left side
     {
         start_color();
         init_pair(3, COLOR_WHITE, COLOR_WHITE);
@@ -108,7 +108,7 @@ void snakeGame::DrawWindow()
         refresh();
     }
 
-    for (int32 i = 0; i < maxheight; i++) // draws right side
+    for (int i = 0; i < maxheight; i++) // draws right side
     {
         start_color();
         init_pair(3, COLOR_WHITE, COLOR_WHITE);
@@ -118,18 +118,31 @@ void snakeGame::DrawWindow()
         attroff(COLOR_PAIR(3));
         refresh();
     }
-    return;
+    // 모서리 부분을 다른 색으로 표시
+    start_color();
+    init_pair(4, COLOR_BLUE, COLOR_BLUE);
+    attron(COLOR_PAIR(4));
+    move(0, 0);
+    addch(edgechar);
+    move(0, maxwidth - 12);
+    addch(edgechar);
+    move(maxheight - 1, 0);
+    addch(edgechar);
+    move(maxheight - 1, maxwidth - 12);
+    addch(edgechar);
+    attroff(COLOR_PAIR(4));
+    refresh();
 }
 
 // draw snake's body
 void snakeGame::DrawSnake()
 {
-    for (int32 i = 0; i < 3; i++)
+    for (int i = 0; i < 3; i++)
     {
         snake.push_back(CharPosition(30 + i, 10));
     }
 
-    for (int32 i = 0; i < snake.size(); i++)
+    for (int i = 0; i < snake.size(); i++)
     {
         move(snake[i].y, snake[i].x);
         addch(partchar);
@@ -155,14 +168,14 @@ void snakeGame::PrintScore()
 // position a new fruit in the game window
 void snakeGame::PositionFruit()
 {
-    int32 tmpx = rand() % (maxwidth - 13) + 1; // +1 to avoid the 0
-    int32 tmpy = rand() % (maxheight - 2) + 1;
+    int tmpx = rand() % (maxwidth - 13) + 1; // +1 to avoid the 0
+    int tmpy = rand() % (maxheight - 2) + 1;
 
     fruit.x = tmpx;
     fruit.y = tmpy;
 
     // check that the fruit is not positioned on the snake
-    for (int32 i = 0; i < snake.size(); i++)
+    for (int i = 0; i < snake.size(); i++)
     {
         if (snake[i].x == tmpx && snake[i].y == tmpy)
         {
@@ -182,7 +195,7 @@ void snakeGame::PositionFruit()
 void snakeGame::fruitTime()
 {
     fruitTimer++;
-    if (fruitTimer % itemChange == 0)
+    if (fruitTimer % itemChange == 0) // fruit의 위치가 바뀜
     {
         move(fruit.y, fruit.x);
         printw(" ");
@@ -192,13 +205,13 @@ void snakeGame::fruitTime()
 }
 void snakeGame::PositionPoison()
 {
-    int32 tmpx1 = rand() % (maxwidth - 13) + 1; // +1 to avoid the 0
-    int32 tmpy1 = rand() % (maxheight - 2) + 1;
+    int tmpx1 = rand() % (maxwidth - 13) + 1; // +1 to avoid the 0
+    int tmpy1 = rand() % (maxheight - 2) + 1;
 
     poison.x = tmpx1;
     poison.y = tmpy1;
 
-    for (int32 i = 0; i < snake.size(); i++)
+    for (int i = 0; i < snake.size(); i++)
     {
         if (snake[i].x == tmpx1 && snake[i].y == tmpy1)
         {
@@ -214,7 +227,7 @@ void snakeGame::PositionPoison()
     attroff(COLOR_PAIR(2));
     refresh();
 }
-void snakeGame::poisonTime()
+void snakeGame::poisonTime() // poison의 위치가 바뀜
 {
     poisonTimer++;
     if (poisonTimer % itemChange == 0)
@@ -236,7 +249,7 @@ bool snakeGame::FatalCollision()
     }
 
     // if the snake collides into himself
-    for (int32 i = 2; i < snake.size(); i++)
+    for (int i = 2; i < snake.size(); i++)
     {
         if (snake[0].x == snake[i].x && snake[0].y == snake[i].y)
         {
@@ -244,11 +257,11 @@ bool snakeGame::FatalCollision()
         }
     }
 
-    if (snake.size() < 3)
+    if (snake.size() < 3) // 뱀의 길이가 3보다 짧아진 경우 종료
     {
         return true;
     }
-    if (direction == 'r' && KeyPressed == KEY_LEFT)
+    if (direction == 'r' && KeyPressed == KEY_LEFT) // 진행방향의 반대키를 누른경우 종료
     {
         return true;
     }
@@ -357,7 +370,7 @@ void snakeGame::MoveSnake()
         refresh();
         snake.pop_back(); // removes the last element in the vector, reducing the container size by one
     }
-    else if (bEatsPoison)
+    else if (bEatsPoison) // 뱀이 poison을 먹었을 때 길이 감소
     {
         move(snake[snake.size() - 1].y, snake[snake.size() - 1].x);
         printw(" ");
