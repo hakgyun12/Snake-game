@@ -3,13 +3,16 @@
 
 using namespace std;
 
-Position::Position(int col, int row)
+// Unreal coding standards
+
+int KeyPressed;
+CharPosition::CharPosition(int col, int row)
 {
     x = col;
     y = row;
 }
 
-Position::Position()
+CharPosition::CharPosition()
 {
     x = 0;
     y = 0;
@@ -17,38 +20,45 @@ Position::Position()
 
 snakeGame::snakeGame()
 {
-    snakeBody = 'x';
-    upRightEdge = (char)187;
-    upLeftEdge = (char)201;
-    downRightEdge = (char)188;
-    downLeftEdge = (char)200;
-    rowLine = (char)205;
-    colLine = (char)186;
-
-    growthItemChar = '+';
-    poisonItemChar = '-';
+    // variables initialisation:
+    partchar = 'x'; // character to represent the snake
+    edgechar = 'o'; // full rectangle on the key table
+    growthItemchar = '+';
+    poisonItemchar = '-';
     growthItem.x = 0;
     growthItem.y = 0;
-    poisonItem.x = 1;
-    poisonItem.y = 1;
-    score = 0;
-    speed = 80000;
-    eatGrowthItem = false;
-    eatPoisonItem = false;
-    direction = 'l';
+    poisonItem.x = 0;
+    poisonItem.y = 0;
+    currentLength = 3;
+
+    requiredLength = 10;    // 다음 단계로 넘어가기 위해 만족해야 할 뱀의 길이
+    requiredGrowthItem = 5; // 다음 단계로 넘어가기 위해 만족해야 할 Growth Item 먹은 수
+    requiredPoisonItem = 5; // 다음 단계로 넘어가기 위해 만족해야 할 Poison Item 먹은 수
+    requiredGate = 5;       // 다음 단계로 넘어가기 위해 만족해야 할 Gate 통과 횟수
 
     scoreGrowthItem = 0;
     scorePoisonItem = 0;
-    snakeLength = 0;
     scoreGate = 0;
-
+    speed = 100000;
+    itemChange = 80; // 뱀이 아무것도 먹지 않을 때 아이템 위치가 대기하는 시간
+    gateChange = 100;
+    bEatsGrowth = 0;
+    bEatsPoison = 0;
+    bAtGate_1 = 0;
+    bAtGate_2 = 0;
+    direction = 'l';
+    growthItemTimer = 0;
+    poisonItemTimer = 0;
+    gateTimer = 0;
     srand(time(NULL));
 
-    initGame();
-    positionItem();
-    drawWindow();
-    drawSnake();
-    printScore();
+    InitGameWindow();
+    PositionGrowth();
+    PositionPoison();
+    DrawWindow();
+    DrawSnake();
+    PrintScore();
+    PositionGate();
 
     refresh();
 }
@@ -60,173 +70,248 @@ snakeGame::~snakeGame()
     endwin();
 }
 
-void snakeGame::initGame()
+// initialise the game window
+void snakeGame::InitGameWindow()
 {
     initscr(); // initialise the screen
     nodelay(stdscr, TRUE);
-    keypad(stdscr, true); // initialise the keyboard: we can use arrows for directions
-    noecho();             // user input is not displayed on the screen
-    curs_set(0);          // cursor symbol is not not displayed on the screen (Linux)
-    getmaxyx(stdscr, height, width);
+    keypad(stdscr, true);                  // initialise the keyboard: we can use arrows for directions
+    noecho();                              // user input is not displayed on the screen
+    curs_set(0);                           // cursor symbol is not not displayed on the screen (Linux)
+    getmaxyx(stdscr, maxheight, maxwidth); // define dimensions of game window
+    return;
 }
 
-void snakeGame::drawWindow()
+// draw the game window
+void snakeGame::DrawWindow()
 {
-    move(0, 0);
-    addch(upLeftEdge);
-
-    move(0, width - 12);
-    addch(upRightEdge);
-
-    move(height - 1, 0);
-    addch(downLeftEdge);
-
-    move(height - 1, width - 12);
-    addch(downRightEdge);
-
-    for (int i = 1; i < width - 12; i++) // draws top
+    for (int i = 1; i < maxwidth - 12; i++) // draws top
     {
+        wall.push_back(CharPosition(i, 0));
+        start_color();
+        init_pair(3, COLOR_WHITE, COLOR_WHITE);
+        attron(COLOR_PAIR(3));
         move(0, i);
-        addch(rowLine);
+        addch(edgechar);
+        attroff(COLOR_PAIR(3));
+        refresh();
     }
-    for (int i = 1; i < width - 12; i++) // draws bottom
+
+    for (int i = 1; i < maxwidth - 12; i++) // draws bottom
     {
-        move(height - 1, i);
-        addch(rowLine);
+        wall.push_back(CharPosition(i, maxheight - 1));
+        start_color();
+        init_pair(3, COLOR_WHITE, COLOR_WHITE);
+        attron(COLOR_PAIR(3));
+        move(maxheight - 1, i);
+        addch(edgechar);
+        attroff(COLOR_PAIR(3));
+        refresh();
     }
-    for (int i = 1; i < height - 1; i++) // draws left side
+
+    for (int i = 1; i < maxheight - 1; i++) // draws left side
     {
+        wall.push_back(CharPosition(0, i));
+        start_color();
+        init_pair(3, COLOR_WHITE, COLOR_WHITE);
+        attron(COLOR_PAIR(3));
         move(i, 0);
-        addch(colLine);
+        addch(edgechar);
+        attroff(COLOR_PAIR(3));
+        refresh();
     }
-    for (int i = 1; i < height - 1; i++) // draws right side
+
+    for (int i = 1; i < maxheight - 1; i++) // draws right side
     {
-        move(i, width - 12);
-        addch(colLine);
+        wall.push_back(CharPosition(maxwidth - 12, i));
+        start_color();
+        init_pair(3, COLOR_WHITE, COLOR_WHITE);
+        attron(COLOR_PAIR(3));
+        move(i, maxwidth - 12);
+        addch(edgechar);
+        attroff(COLOR_PAIR(3));
+        refresh();
     }
+
+    // 모서리 부분을 다른 색으로 표시
+    start_color();
+    init_pair(4, COLOR_BLACK, COLOR_BLACK);
+    attron(COLOR_PAIR(4));
+    move(0, 0);
+    addch(edgechar);
+    move(0, maxwidth - 12);
+    addch(edgechar);
+    move(maxheight - 1, 0);
+    addch(edgechar);
+    move(maxheight - 1, maxwidth - 12);
+    addch(edgechar);
+    attroff(COLOR_PAIR(4));
+    refresh();
 }
 
-void snakeGame::drawSnake()
+// draw snake's body
+void snakeGame::DrawSnake()
 {
-    for (int i = 0; i < 5; i++)
+    for (int i = 0; i < 3; i++)
     {
-        snake.push_back(Position(40 + i, 20));
+        snake.push_back(CharPosition(30 + i, 10));
     }
+
     for (int i = 0; i < snake.size(); i++)
     {
         move(snake[i].y, snake[i].x);
-        addch(snakeBody);
+        addch(partchar);
     }
+    return;
 }
 
-void snakeGame::printScore()
+// print score at bottom of window
+void snakeGame::PrintScore()
 {
-    move(0, width - 10);
-    printw("Score Borad");
-    move(1, width - 10);
-    printw("B: (%d) / (%d)", (snakeLength, 10));
-    move(2, width - 10);
-    printw("+: (%d)", scoreGrowthItem);
-    move(3, width - 10);
-    printw("-: (%d)", scorePoisonItem);
-    move(4, width - 10);
-    printw("G: (%d)", scoreGate);
+    move(0, maxwidth - 11);
+    printw("Score Board");
+    move(1, maxwidth - 11);
+    printw("B:(%d)/(%d)", currentLength, requiredLength);
+    move(2, maxwidth - 11);
+    printw("+:(%d)/(%d)", scoreGrowthItem, requiredGrowthItem);
+    move(3, maxwidth - 11);
+    printw("-:(%d)/(%d)", scorePoisonItem, requiredPoisonItem);
+    move(4, maxwidth - 11);
+    printw("G:(%d)/(%d)", scoreGate, requiredGate);
 }
 
-void snakeGame::positionItem()
+void snakeGame::PositionGate()
 {
-    int numOfItem = rand() % 3 + 1;
-    while (numOfItem > 0)
+    // gate 백터 내에서 난수로 index를 중복 안되게 받아옴
+    int gate_idx1 = rand() % wall.size();
+    int gate_idx2 = rand() % wall.size();
+    while (gate_idx2 == gate_idx1)
     {
-        int setItem = rand() % 2 + 1;
-        int px = rand() % width + 1;
-        int py = rand() % height + 1;
+        gate_idx2 = rand() % wall.size();
+    }
+    wall.erase(wall.begin() + gate_idx1);
+    wall.erase(wall.begin() + gate_idx2);
+    gate_1 = wall[gate_idx1];
+    gate_2 = wall[gate_idx2];
+    start_color();
+    init_pair(5, COLOR_BLUE, COLOR_BLUE);
+    attron(COLOR_PAIR(5));
+    move(gate_1.y, gate_1.x);
+    addch(edgechar);
+    move(gate_2.y, gate_2.x);
+    addch(edgechar);
+    attroff(COLOR_PAIR(5));
+    refresh();
+}
 
-        for (int i = 0; i < snake.size(); i++)
-        {
-            if (snake[i].x == px && snake[i].y == py)
-            {
-                continue;
-            }
-        }
-
-        for (int i = 0; i < item.size(); i++)
-        {
-            if (item[i].x == px && item[i].y == py)
-            {
-                continue;
-            }
-        }
-
-        if (px >= width - 12 || py >= height - 1)
-        {
-            continue;
-        }
-
-        if (setItem == 1)
-        {
-            growthItem.x = px;
-            growthItem.y = py;
-            move(px, py);
-            addch(growthItemChar);
-        }
-        else
-        {
-            poisonItem.x = px;
-            poisonItem.y = py;
-            move(px, py);
-            addch(poisonItemChar);
-        }
+void snakeGame::gateTime()
+{
+    gateTimer++;
+    if (gateTimer % gateChange == 0)
+    {
+        wall.push_back(CharPosition(gate_1.x, gate_1.y));
+        wall.push_back(CharPosition(gate_2.x, gate_2.y)); // wall 벡터에 다시 추가
+        attron(COLOR_PAIR(3));
+        move(gate_1.y, gate_1.x);
+        addch(edgechar);
+        move(gate_2.y, gate_2.x);
+        addch(edgechar);
+        attroff(COLOR_PAIR(3));
         refresh();
-        numOfItem--;
+        PositionGate();
+        gateTimer = 0;
     }
 }
 
-void snakeGame::snakePosition()
+// position a new growthItem in the game window
+void snakeGame::PositionGrowth()
 {
+    int tmpx = rand() % (maxwidth - 13) + 1; // +1 to avoid the 0
+    int tmpy = rand() % (maxheight - 2) + 1;
+
+    growthItem.x = tmpx;
+    growthItem.y = tmpy;
+
+    // check that the growthItem is not positioned on the snake
+    for (int i = 0; i < snake.size(); i++)
+    {
+        if (snake[i].x == tmpx && snake[i].y == tmpy)
+        {
+            growthItem.x = tmpx;
+            growthItem.y = tmpy;
+            // if true, ignore the following and go back to the beginning of function
+        }
+    }
+    start_color();
+    init_pair(1, COLOR_WHITE, COLOR_GREEN);
+    attron(COLOR_PAIR(1));
+    move(growthItem.y, growthItem.x);
+    addch(growthItemchar);
+    attroff(COLOR_PAIR(1));
+    refresh();
+}
+void snakeGame::growthItemTime()
+{
+    growthItemTimer++;
+    if (growthItemTimer % itemChange == 0) // growthItem의 위치가 바뀜
+    {
+        move(growthItem.y, growthItem.x);
+        printw(" ");
+        PositionGrowth();
+        growthItemTimer = 0;
+    }
+}
+void snakeGame::PositionPoison()
+{
+    int tmpx1 = rand() % (maxwidth - 13) + 1; // +1 to avoid the 0
+    int tmpy1 = rand() % (maxheight - 2) + 1;
+
+    poisonItem.x = tmpx1;
+    poisonItem.y = tmpy1;
+
+    for (int i = 0; i < snake.size(); i++)
+    {
+        if (snake[i].x == tmpx1 && snake[i].y == tmpy1)
+        {
+            poisonItem.x = tmpx1;
+            poisonItem.y = tmpy1;
+        }
+    }
+    start_color();
+    init_pair(2, COLOR_WHITE, COLOR_RED);
+    attron(COLOR_PAIR(2));
+    move(poisonItem.y, poisonItem.x);
+    addch(poisonItemchar);
+    attroff(COLOR_PAIR(2));
+    refresh();
+}
+void snakeGame::poisonItemTime() // poisonItem의 위치가 바뀜
+{
+    poisonItemTimer++;
+    if (poisonItemTimer % itemChange == 0)
+    {
+        move(poisonItem.y, poisonItem.x);
+        printw(" ");
+        PositionPoison();
+        poisonItemTimer = 0;
+    }
 }
 
-bool snakeGame::getGrowthItem()
+// set game over situations
+bool snakeGame::FatalCollision() // 이름 바꿔야 할 듯, 스네이크 길이 미만 조건도 포함되어 있으니...
 {
-    if (snake[0].x == growthItem.x && snake[0].y == growthItem.y)
-    {
-        snakeLength++;
-        printScore();
+    bool cWall = false;
 
-        // if score is a multiple of 100, increase snake speed
-        speed -= 1000;
-        return eatGrowthItem = true;
-    }
-    else
+    // if the snake hits the edge of the window
+    if (snake[0].x == 0 || snake[0].x == maxwidth - 12 || snake[0].y == 0 || snake[0].y == maxheight - 1)
     {
-        return eatGrowthItem = false;
-    }
-}
-
-bool snakeGame::getPoisonItem()
-{
-    if (snake[0].x == poisonItem.x && snake[0].y == poisonItem.y)
-    {
-        snakeLength--;
-        printScore();
-
-        // if score is a multiple of 100, increase snake speed
-        speed -= 1000;
-        return eatPoisonItem = true;
-    }
-    else
-    {
-        return eatPoisonItem = false;
-    }
-}
-
-bool snakeGame::collision()
-{
-    if (snake[0].x == 0 || snake[0].x == width - 12 || snake[0].y == 0 || snake[0].y == height - 1)
-    {
-        return true;
+        if (!((snake[0].x == gate_1.x && snake[0].y == gate_1.y) || (snake[0].x == gate_2.x && snake[0].y == gate_2.y)))
+        {
+            return true;
+        }
     }
 
+    // if the snake collides into himself
     for (int i = 2; i < snake.size(); i++)
     {
         if (snake[0].x == snake[i].x && snake[0].y == snake[i].y)
@@ -234,16 +319,92 @@ bool snakeGame::collision()
             return true;
         }
     }
+
+    if (snake.size() < 3) // 뱀의 길이가 3보다 짧아진 경우 종료
+    {
+        return true;
+    }
+    if (direction == 'r' && KeyPressed == KEY_LEFT) // 진행방향의 반대키를 누른경우 종료
+    {
+        return true;
+    }
+    if (direction == 'l' && KeyPressed == KEY_RIGHT)
+    {
+        return true;
+    }
+    if (direction == 'u' && KeyPressed == KEY_DOWN)
+    {
+        return true;
+    }
+    if (direction == 'd' && KeyPressed == KEY_UP)
+    {
+        return true;
+    }
+
     return false;
 }
 
-void snakeGame::randomGate()
+bool snakeGame::GetsGate()
 {
+    if (snake[0].x == gate_1.x && snake[0].y == gate_1.y)
+    {
+        gateTimer = gateChange - snake.size() - 1;
+        scoreGate++;
+        PrintScore();
+        return bAtGate_1 = true;
+    }
+    else if (snake[0].x == gate_2.x && snake[0].y == gate_2.y)
+    {
+        gateTimer = gateChange - snake.size() - 1;
+        scoreGate++;
+        PrintScore();
+        return bAtGate_2 = true;
+    }
 }
 
-void snakeGame::snakeMove()
+// define behaviour when snake eats the growthItem
+bool snakeGame::GetsGrowth()
 {
-    int KeyPressed = getch();
+    if (snake[0].x == growthItem.x && snake[0].y == growthItem.y)
+    {
+        growthItemTimer = 0;
+        PositionGrowth();
+        currentLength++;
+        /*
+        if (currentLength >= requiredLength){   
+        // 다음 단계로 진행하는 조건 하나 만족
+        }
+        */
+        scoreGrowthItem++;
+        PrintScore();
+        return bEatsGrowth = true;
+    }
+    else
+    {
+        return bEatsGrowth = false;
+    }
+}
+bool snakeGame::GetsPoison()
+{
+    if (snake[0].x == poisonItem.x && snake[0].y == poisonItem.y)
+    {
+        poisonItemTimer = 0;
+        PositionPoison();
+        currentLength--;
+        scorePoisonItem++;
+        PrintScore();
+        return bEatsPoison = true;
+    }
+    else
+    {
+        return bEatsPoison = false;
+    }
+}
+
+// define snake's movements
+void snakeGame::MoveSnake()
+{
+    KeyPressed = getch();
     switch (KeyPressed)
     {
     case KEY_LEFT:
@@ -251,81 +412,157 @@ void snakeGame::snakeMove()
         {
             direction = 'l';
         }
+        else
+            FatalCollision();
         break;
     case KEY_RIGHT:
         if (direction != 'l')
         {
             direction = 'r';
         }
+        else
+            FatalCollision();
         break;
     case KEY_UP:
         if (direction != 'd')
         {
             direction = 'u';
         }
+        else
+            FatalCollision();
         break;
     case KEY_DOWN:
         if (direction != 'u')
         {
             direction = 'd';
         }
+        else
+            FatalCollision();
         break;
     case KEY_BACKSPACE:
-        direction = 'q';
+        direction = 'q'; // key to quit the game
         break;
     }
 
-    if (!eatGrowthItem)
+    // the snake doesn't eat growthItem, remains same size
+    if (!(bEatsGrowth || bEatsPoison))
     {
+        move(snake[snake.size() - 1].y, snake[snake.size() - 1].x); // moves at the end of the tail
+        printw(" ");                                                // add empty ch to remove last character
+        refresh();
+        snake.pop_back(); // removes the last element in the vector, reducing the container size by one
+    }
+    else if (bEatsPoison) // 뱀이 poisonItem을 먹었을 때 길이 감소
+    {
+        move(snake[snake.size() - 1].y, snake[snake.size() - 1].x);
+        printw(" ");
+        snake.pop_back();
         move(snake[snake.size() - 1].y, snake[snake.size() - 1].x);
         printw(" ");
         refresh();
         snake.pop_back();
     }
 
+    // the snake moves and we add an extra character at the beginning of the vector
+    // add a head and initialise new coordinates for CharPosition according to the direction input
     if (direction == 'l')
     {
-        snake.insert(snake.begin(), Position(snake[0].x - 1, snake[0].y));
+        snake.insert(snake.begin(), CharPosition(snake[0].x - 1, snake[0].y));
     }
     else if (direction == 'r')
     {
-        snake.insert(snake.begin(), Position(snake[0].x + 1, snake[0].y));
+        snake.insert(snake.begin(), CharPosition(snake[0].x + 1, snake[0].y));
     }
     else if (direction == 'u')
     {
-        snake.insert(snake.begin(), Position(snake[0].x, snake[0].y - 1));
+        snake.insert(snake.begin(), CharPosition(snake[0].x, snake[0].y - 1));
     }
     else if (direction == 'd')
     {
-        snake.insert(snake.begin(), Position(snake[0].x, snake[0].y + 1));
+        snake.insert(snake.begin(), CharPosition(snake[0].x, snake[0].y + 1));
     }
 
+    if (bAtGate_1)
+    {
+        bAtGate_1 = false;
+        if (gate_2.x == 0) // 좌측 가장자리 벽
+        {
+            direction = 'r';
+            snake[0] = CharPosition(gate_2.x + 1, gate_2.y);
+        }
+        else if (gate_2.x == maxwidth - 12) // 우측 가장자리 벽
+        {
+            direction = 'l';
+            snake[0] = CharPosition(gate_2.x - 1, gate_2.y);
+        }
+        else if (gate_2.y == 0) // 위쪽 가장자리 벽
+        {
+            direction = 'd';
+            snake[0] = CharPosition(gate_2.x, gate_2.y + 1);
+        }
+        else if (gate_2.y == maxheight - 1) // 아래쪽 가장자리 벽
+        {
+            direction = 'u';
+            snake[0] = CharPosition(gate_2.x, gate_2.y - 1);
+        }
+    }
+    else if (bAtGate_2)
+    {
+        bAtGate_2 = false;
+        if (gate_1.x == 0) // 좌측 가장자리 벽
+        {
+            direction = 'r';
+            snake[0] = CharPosition(gate_1.x + 1, gate_1.y);
+        }
+        else if (gate_1.x == maxwidth - 12) // 우측 가장자리 벽
+        {
+            direction = 'l';
+            snake[0] = CharPosition(gate_1.x - 1, gate_1.y);
+        }
+        else if (gate_1.y == 0) // 위쪽 가장자리 벽
+        {
+            direction = 'd';
+            snake[0] = CharPosition(gate_1.x, gate_1.y + 1);
+        }
+        else if (gate_1.y == maxheight - 1) // 아래쪽 가장자리 벽
+        {
+            direction = 'u';
+            snake[0] = CharPosition(gate_1.x, gate_1.y - 1);
+        }
+    }
+
+    // move to the new CharPosition coordinates
     move(snake[0].y, snake[0].x);
-    addch(snakeBody);
+    addch(partchar); // add a new head
     refresh();
     return;
 }
 
-void snakeGame::playGame()
+void snakeGame::PlayGame()
 {
     while (1)
     {
-        if (collision())
+        if (FatalCollision())
         {
-            move((height - 2) / 2, (width - 5) / 2);
+            move((maxheight - 2) / 2, (maxwidth - 5) / 2);
             printw("GAME OVER");
+            endwin();
             break;
         }
 
-        getGrowthItem();
-        getPoisonItem();
-        snakeMove();
+        GetsGrowth();
+        GetsPoison();
+        GetsGate();
+        growthItemTime();
+        poisonItemTime();
+        gateTime();
+        MoveSnake();
 
-        if (direction == 'q')
+        if (direction == 'q') //exit
         {
             break;
         }
 
-        usleep(speed);
+        usleep(speed); // delay
     }
 }
