@@ -571,7 +571,7 @@ void snakeGame::PlayGame()
     {
         if (FatalCollision())
         {
-            move((maxheight - 2) / 2, (maxwidth - 5) / 2);
+            move((maxheight - 2) / 2, (maxwidth - 20) / 2);
             printw("GAME OVER");
             endwin();
             isClear = false;
@@ -589,5 +589,11 @@ void snakeGame::PlayGame()
             break;
         }
         usleep(speed); // delay
+    }
+    if (isClear)
+    {
+        move((maxheight - 2) / 2, (maxwidth - 20) / 2);
+        printw("Mission Complete");
+        endwin();
     }
 }

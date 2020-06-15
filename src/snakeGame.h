@@ -51,6 +51,7 @@ private:
     void growthItemTime();
     void poisonItemTime();
     void gateTime();
+    void ClearCentre(float x, float y);
 
 public:
     snakeGame(int level);

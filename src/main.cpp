@@ -59,7 +59,7 @@ int UserInput()
 // print start menu
 int IsUserReady()
 {
-    ClearCentre(3, 2.5);
+    ClearCentre(3.5, 2.5);
     printw("Welcome to the Snake Game. Are you ready? (y/n)");
     return UserInput();
 }
@@ -67,21 +67,14 @@ int IsUserReady()
 // print end of the game menu and ask user to play again
 int AskUserToPlayAgain(bool clear)
 {
-    ClearCentre(2.5, 2.5);
+    ClearCentre(3.5, 2.5);
     if (clear)
     {
-        printw("Mission Complete \n\t\tDo you want to play Continue? (y/n)");
+        printw("Do you want to play Continue? (y/n)");
     }
     else
     {
         printw("Do you want to play again? (y/n)");
     }
-    return UserInput();
-}
-
-int AskUserToPlayContinue()
-{
-    ClearCentre(2.5, 2.5);
-    printw("Mission Complete Do you want to play Continue? (y/n)");
     return UserInput();
 }
