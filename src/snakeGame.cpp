@@ -30,11 +30,12 @@ snakeGame::snakeGame(int level)
     poisonItem.x = 0;
     poisonItem.y = 0;
     currentLength = 3;
+    isClear = false;
 
-    requiredLength = 5 * level;     // 다음 단계로 넘어가기 위해 만족해야 할 뱀의 길이
+    requiredLength = 0 * level;     // 다음 단계로 넘어가기 위해 만족해야 할 뱀의 길이
     requiredGrowthItem = 1 * level; // 다음 단계로 넘어가기 위해 만족해야 할 Growth Item 먹은 수
-    requiredPoisonItem = 1 * level; // 다음 단계로 넘어가기 위해 만족해야 할 Poison Item 먹은 수
-    requiredGate = 1 * level;       // 다음 단계로 넘어가기 위해 만족해야 할 Gate 통과 횟수
+    requiredPoisonItem = 0 * level; // 다음 단계로 넘어가기 위해 만족해야 할 Poison Item 먹은 수
+    requiredGate = 0 * level;       // 다음 단계로 넘어가기 위해 만족해야 할 Gate 통과 횟수
 
     scoreGrowthItem = 0;
     scorePoisonItem = 0;
@@ -182,22 +183,22 @@ void snakeGame::PrintScore()
     move(6, maxwidth - 11);
     printw("Mission");
     move(7, maxwidth - 11);
-    printw("B:(%d)", requiredLength);
+    printw("B:(%d)", requiredLength - currentLength);
     move(8, maxwidth - 11);
-    printw("+:(%d)", requiredGrowthItem);
+    printw("+:(%d)", requiredGrowthItem - scoreGrowthItem);
     move(9, maxwidth - 11);
-    printw("-:(%d)", requiredPoisonItem);
+    printw("-:(%d)", requiredPoisonItem - scorePoisonItem);
     move(10, maxwidth - 11);
-    printw("G:(%d)", requiredGate);
+    printw("G:(%d)", requiredGate - scoreGate);
 }
 
 bool snakeGame::NextStage()
 {
     if (currentLength >= requiredLength && scoreGrowthItem >= requiredGrowthItem && scorePoisonItem >= requiredPoisonItem && scoreGate >= requiredGate)
     {
-        return false;
+        return true;
     }
-    return true;
+    return false;
 }
 
 void snakeGame::PositionGate()
@@ -558,18 +559,24 @@ void snakeGame::MoveSnake()
     return;
 }
 
-int snakeGame::PlayGame()
+bool snakeGame::getClear()
 {
-    while (NextStage())
+    return isClear;
+}
+
+void snakeGame::PlayGame()
+{
+    isClear = true;
+    while (!NextStage())
     {
         if (FatalCollision())
         {
             move((maxheight - 2) / 2, (maxwidth - 5) / 2);
             printw("GAME OVER");
             endwin();
-            return 0;
+            isClear = false;
+            break;
         }
-
         GetsGrowth();
         GetsPoison();
         GetsGate();
