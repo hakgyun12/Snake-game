@@ -51,7 +51,7 @@ private:
     void growthItemTime();
     void poisonItemTime();
     void gateTime();
-    void ClearCentre(float x, float y);
+    char getWarpDirection(char d, CharPosition gate);
 
 public:
     snakeGame(int level);

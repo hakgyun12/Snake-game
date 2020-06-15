@@ -67,7 +67,7 @@ int IsUserReady()
 // print end of the game menu and ask user to play again
 int AskUserToPlayAgain(bool clear)
 {
-    ClearCentre(3.5, 2.5);
+    ClearCentre(2.8, 2.5);
     if (clear)
     {
         printw("Do you want to play Continue? (y/n)");
