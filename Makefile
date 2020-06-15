@@ -1,3 +1,3 @@
 run:
-	g++ -o snake src/fmain.cpp src/fsnakeGame.cpp -lncurses
-	./snake
+	g++ -o a src/snakeGame.cpp src/main.cpp -lncurses
+	./a

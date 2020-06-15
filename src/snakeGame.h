@@ -37,6 +37,8 @@ private:
     void DrawWindow();
     void DrawSnake();
     void PrintScore();
+    bool NextStage();
+    //bool CheckNextStage();
     void PositionGrowth();
     void PositionPoison();
     void PositionGate();
@@ -50,9 +52,9 @@ private:
     void gateTime();
 
 public:
-    snakeGame();
+    snakeGame(int level);
     ~snakeGame(); // destructor for cleanup and memory deallocation
-    void PlayGame();
+    int PlayGame();
 };
 
 #endif

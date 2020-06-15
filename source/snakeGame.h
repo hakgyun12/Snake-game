@@ -21,31 +21,35 @@ struct CharPosition
     CharPosition();
 };
 
-class fSnakeGame
+class snakeGame
 {
 private:
     int32 score, del, maxwidth, maxheight;
-    char direction, partchar, edgechar, fruitchar, poisonchar;
+    char direction, partchar, edgechar, growthchar, poisonchar;
     // partchar is the character representing the snake's body
     // edgechar is the character representing the edge of the game window
     // fruitchar is the character representing the fruit
     // del stands for delay
     bool bEatsFruit;
-    CharPosition fruit;              // need to clarify this combination
+    CharPosition item;               // need to clarify this combination
     std::vector<CharPosition> snake; // represent the snake's body
 
-    void InitGameWindow();
-    void DrawWindow();
-    void DrawSnake();
-    void PrintScore();
-    void PositionFruit();
+    void CreateMap();
+    void ScreenWindow();
+    void ScreenSnake();
+    void SnakePosition();
+    void GetGrowthItem();
+    void GetPoisonItem();
+    void PositionItem();
     bool FatalCollision();
-    void MoveSnake();
-    bool GetsFruit();
+    void SnakeMove();
+    void RandomGate();
+    void PrintMission();
+    bool GetItem();
 
 public:
-    fSnakeGame();
-    ~fSnakeGame(); // destructor for cleanup and memory deallocation
+    snakeGame();
+    ~snakeGame(); // destructor for cleanup and memory deallocation
     void PlayGame();
 };
 

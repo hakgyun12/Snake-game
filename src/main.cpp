@@ -11,19 +11,40 @@ int maxheight, maxwidth;
 void PlayGame();
 int IsUserReady();
 int AskUserToPlayAgain();
+int AskUserToPlayContinue();
 void ClearCentre();
 int UserInput();
 
 int main()
 {
+    int a = 1;
+    int level = 1;
+    bool checked = true;
     if (IsUserReady() == 'y') // wait for confirmation of the user
-        do
+    {
+        while (a)
         {
+            snakeGame NewSnake(level++);
+            NewSnake.PlayGame();
+            if (a == 1)
             {
-                snakeGame NewSnake;
-                NewSnake.PlayGame();
+                if (AskUserToPlayContinue() == 'y')
+                    continue;
             }
-        } while (AskUserToPlayAgain() == 'y');
+            else if (a == 0)
+            {
+                if (AskUserToPlayAgain() == 'y')
+                {
+                    a = 1;
+                    level = 1;
+                }
+                else
+                {
+                    a = 0;
+                }
+            }
+        }
+    }
     return 0;
 }
 
@@ -61,5 +82,12 @@ int AskUserToPlayAgain()
 {
     ClearCentre(2.5, 2.5);
     printw("Do you want to play again? (y/n)");
+    return UserInput();
+}
+
+int AskUserToPlayContinue()
+{
+    ClearCentre(2.5, 2.5);
+    printw("Mission Complete Do you want to play Continue? (y/n)");
     return UserInput();
 }

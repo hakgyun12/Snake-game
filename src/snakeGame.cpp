@@ -18,7 +18,7 @@ CharPosition::CharPosition()
     y = 0;
 }
 
-snakeGame::snakeGame()
+snakeGame::snakeGame(int level)
 {
     // variables initialisation:
     partchar = 'x'; // character to represent the snake
@@ -31,10 +31,10 @@ snakeGame::snakeGame()
     poisonItem.y = 0;
     currentLength = 3;
 
-    requiredLength = 10;    // 다음 단계로 넘어가기 위해 만족해야 할 뱀의 길이
-    requiredGrowthItem = 5; // 다음 단계로 넘어가기 위해 만족해야 할 Growth Item 먹은 수
-    requiredPoisonItem = 5; // 다음 단계로 넘어가기 위해 만족해야 할 Poison Item 먹은 수
-    requiredGate = 5;       // 다음 단계로 넘어가기 위해 만족해야 할 Gate 통과 횟수
+    requiredLength = 5 * level;     // 다음 단계로 넘어가기 위해 만족해야 할 뱀의 길이
+    requiredGrowthItem = 1 * level; // 다음 단계로 넘어가기 위해 만족해야 할 Growth Item 먹은 수
+    requiredPoisonItem = 1 * level; // 다음 단계로 넘어가기 위해 만족해야 할 Poison Item 먹은 수
+    requiredGate = 1 * level;       // 다음 단계로 넘어가기 위해 만족해야 할 Gate 통과 횟수
 
     scoreGrowthItem = 0;
     scorePoisonItem = 0;
@@ -171,13 +171,33 @@ void snakeGame::PrintScore()
     move(0, maxwidth - 11);
     printw("Score Board");
     move(1, maxwidth - 11);
-    printw("B:(%d)/(%d)", currentLength, requiredLength);
+    printw("B:(%d)", currentLength);
     move(2, maxwidth - 11);
-    printw("+:(%d)/(%d)", scoreGrowthItem, requiredGrowthItem);
+    printw("+:(%d)", scoreGrowthItem);
     move(3, maxwidth - 11);
-    printw("-:(%d)/(%d)", scorePoisonItem, requiredPoisonItem);
+    printw("-:(%d)", scorePoisonItem);
     move(4, maxwidth - 11);
-    printw("G:(%d)/(%d)", scoreGate, requiredGate);
+    printw("G:(%d)", scoreGate);
+
+    move(6, maxwidth - 11);
+    printw("Mission");
+    move(7, maxwidth - 11);
+    printw("B:(%d)", requiredLength);
+    move(8, maxwidth - 11);
+    printw("+:(%d)", requiredGrowthItem);
+    move(9, maxwidth - 11);
+    printw("-:(%d)", requiredPoisonItem);
+    move(10, maxwidth - 11);
+    printw("G:(%d)", requiredGate);
+}
+
+bool snakeGame::NextStage()
+{
+    if (currentLength >= requiredLength && scoreGrowthItem >= requiredGrowthItem && scorePoisonItem >= requiredPoisonItem && scoreGate >= requiredGate)
+    {
+        return false;
+    }
+    return true;
 }
 
 void snakeGame::PositionGate()
@@ -538,16 +558,16 @@ void snakeGame::MoveSnake()
     return;
 }
 
-void snakeGame::PlayGame()
+int snakeGame::PlayGame()
 {
-    while (1)
+    while (NextStage())
     {
         if (FatalCollision())
         {
             move((maxheight - 2) / 2, (maxwidth - 5) / 2);
             printw("GAME OVER");
             endwin();
-            break;
+            return 0;
         }
 
         GetsGrowth();
@@ -557,12 +577,10 @@ void snakeGame::PlayGame()
         poisonItemTime();
         gateTime();
         MoveSnake();
-
         if (direction == 'q') //exit
         {
             break;
         }
-
         usleep(speed); // delay
     }
 }

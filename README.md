@@ -2,7 +2,7 @@
 
 ### C++ 프로그래밍 언어를 이용하여 Snake Game를 구현하도록 한다!
 
-# Snake-game 단계별 구현
+## Snake-game 단계별 구현
 
 ### 1단계
 
