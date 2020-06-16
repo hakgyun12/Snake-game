@@ -25,10 +25,13 @@ snakeGame::snakeGame(int level)
     edgechar = 'o'; // full rectangle on the key table
     growthItemchar = '+';
     poisonItemchar = '-';
+    speedItemchar = '*';
     growthItem.x = 0;
     growthItem.y = 0;
     poisonItem.x = 0;
     poisonItem.y = 0;
+    speedItem.x = 0;
+    speedItem.y = 0;
     currentLength = 3;
     isClear = false;
 
@@ -50,12 +53,14 @@ snakeGame::snakeGame(int level)
     direction = 'l';
     growthItemTimer = 0;
     poisonItemTimer = 0;
+    speedItemTimer = 0;
     gateTimer = 0;
     srand(time(NULL));
 
     InitGameWindow(level);
     PositionGrowth();
     PositionPoison();
+    PositionSpeed();
     DrawWindow();
     DrawSnake();
     PrintScore();
@@ -267,22 +272,39 @@ void snakeGame::gateTime()
 // position a new growthItem in the game window
 void snakeGame::PositionGrowth()
 {
-    int tmpx = rand() % (maxwidth - 13) + 1; // +1 to avoid the 0
-    int tmpy = rand() % (maxheight - 2) + 1;
+    int tmpx, tmpy;
+    // int tmpx = rand() % (maxwidth - 14) + 1; // +1 to avoid the 0
+    // int tmpy = rand() % (maxheight - 3) + 1;
+    bool clear = false;
+    while (!clear)
+    {
+        tmpx = rand() % (maxwidth - 13) + 1; // +1 to avoid the 0
+        tmpy = rand() % (maxheight - 2) + 1;
+        clear = true;
+
+        // check that the growthItem is not positioned on the snake
+        for (int i = 0; i < snake.size(); i++)
+        {
+            if (snake[i].x == tmpx && snake[i].y == tmpy)
+            {
+                clear = false;
+                break;
+                // if true, ignore the following and go back to the beginning of function
+            }
+        }
+
+        for (int i = 0; i < wall.size(); i++)
+        {
+            if (wall[i].x == tmpx && wall[i].y == tmpy)
+            {
+                clear = false;
+                break;
+            }
+        }
+    }
 
     growthItem.x = tmpx;
     growthItem.y = tmpy;
-
-    // check that the growthItem is not positioned on the snake
-    for (int i = 0; i < snake.size(); i++)
-    {
-        if (snake[i].x == tmpx && snake[i].y == tmpy)
-        {
-            growthItem.x = tmpx;
-            growthItem.y = tmpy;
-            // if true, ignore the following and go back to the beginning of function
-        }
-    }
     start_color();
     init_pair(1, COLOR_WHITE, COLOR_GREEN);
     attron(COLOR_PAIR(1));
@@ -306,20 +328,36 @@ void snakeGame::growthItemTime()
 
 void snakeGame::PositionPoison()
 {
-    int tmpx1 = rand() % (maxwidth - 13) + 1; // +1 to avoid the 0
-    int tmpy1 = rand() % (maxheight - 2) + 1;
-
-    poisonItem.x = tmpx1;
-    poisonItem.y = tmpy1;
-
-    for (int i = 0; i < snake.size(); i++)
+    int tmpx, tmpy;
+    bool clear = false;
+    while (!clear)
     {
-        if (snake[i].x == tmpx1 && snake[i].y == tmpy1)
+        tmpx = rand() % (maxwidth - 13) + 1; // +1 to avoid the 0
+        tmpy = rand() % (maxheight - 2) + 1;
+        clear = true;
+
+        // check that the growthItem is not positioned on the snake
+        for (int i = 0; i < snake.size(); i++)
         {
-            poisonItem.x = tmpx1;
-            poisonItem.y = tmpy1;
+            if (snake[i].x == tmpx && snake[i].y == tmpy)
+            {
+                clear = false;
+                break;
+                // if true, ignore the following and go back to the beginning of function
+            }
+        }
+
+        for (int i = 0; i < wall.size(); i++)
+        {
+            if (wall[i].x == tmpx && wall[i].y == tmpy)
+            {
+                clear = false;
+                break;
+            }
         }
     }
+    poisonItem.x = tmpx;
+    poisonItem.y = tmpy;
     start_color();
     init_pair(2, COLOR_WHITE, COLOR_RED);
     attron(COLOR_PAIR(2));
@@ -338,6 +376,59 @@ void snakeGame::poisonItemTime() // poisonItem의 위치가 바뀜
         printw(" ");
         PositionPoison();
         poisonItemTimer = 0;
+    }
+}
+
+void snakeGame::PositionSpeed()
+{
+    int tmpx, tmpy;
+    bool clear = false;
+    while (!clear)
+    {
+        tmpx = rand() % (maxwidth - 13) + 1; // +1 to avoid the 0
+        tmpy = rand() % (maxheight - 2) + 1;
+        clear = true;
+
+        // check that the growthItem is not positioned on the snake
+        for (int i = 0; i < snake.size(); i++)
+        {
+            if (snake[i].x == tmpx && snake[i].y == tmpy)
+            {
+                clear = false;
+                break;
+                // if true, ignore the following and go back to the beginning of function
+            }
+        }
+
+        for (int i = 0; i < wall.size(); i++)
+        {
+            if (wall[i].x == tmpx && wall[i].y == tmpy)
+            {
+                clear = false;
+                break;
+            }
+        }
+    }
+    speedItem.x = tmpx;
+    speedItem.y = tmpy;
+    start_color();
+    init_pair(6, COLOR_WHITE, COLOR_YELLOW);
+    attron(COLOR_PAIR(6));
+    move(speedItem.y, speedItem.x);
+    addch(speedItemchar);
+    attroff(COLOR_PAIR(6));
+    refresh();
+}
+
+void snakeGame::speedItemTime() // poisonItem의 위치가 바뀜
+{
+    speedItemTimer++;
+    if (speedItemTimer % itemChange == 0)
+    {
+        move(speedItem.y, speedItem.x);
+        printw(" ");
+        PositionSpeed();
+        speedItemTimer = 0;
     }
 }
 
@@ -389,6 +480,16 @@ bool snakeGame::FatalCollision() // 이름 바꿔야 할 듯, 스네이크 길�
     return false;
 }
 
+void snakeGame::GetsSpeed()
+{
+    if (snake[0].x == speedItem.x && snake[0].y == speedItem.y)
+    {
+        speedItemTimer = 0;
+        PositionSpeed();
+        speed -= 10000;
+    }
+}
+
 bool snakeGame::GetsGate()
 {
     if (snake[0].x == gate_1.x && snake[0].y == gate_1.y)
@@ -415,11 +516,6 @@ bool snakeGame::GetsGrowth()
         growthItemTimer = 0;
         PositionGrowth();
         currentLength++;
-        /*
-        if (currentLength >= requiredLength){   
-        // 다음 단계로 진행하는 조건 하나 만족
-        }
-        */
         scoreGrowthItem++;
         PrintScore();
         return bEatsGrowth = true;
@@ -754,8 +850,10 @@ void snakeGame::PlayGame()
         GetsGrowth();
         GetsPoison();
         GetsGate();
+        GetsSpeed();
         growthItemTime();
         poisonItemTime();
+        speedItemTime();
         gateTime();
         MoveSnake();
         if (direction == 'q') //exit
