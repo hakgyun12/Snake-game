@@ -18,23 +18,27 @@ CharPosition::CharPosition()
     y = 0;
 }
 
-snakeGame::snakeGame()
+snakeGame::snakeGame(int level)
 {
     // variables initialisation:
     partchar = 'x'; // character to represent the snake
     edgechar = 'o'; // full rectangle on the key table
     growthItemchar = '+';
     poisonItemchar = '-';
+    speedItemchar = '*';
     growthItem.x = 0;
     growthItem.y = 0;
     poisonItem.x = 0;
     poisonItem.y = 0;
+    speedItem.x = 0;
+    speedItem.y = 0;
     currentLength = 3;
+    isClear = false;
 
-    requiredLength = 10;    // 다음 단계로 넘어가기 위해 만족해야 할 뱀의 길이
-    requiredGrowthItem = 5; // 다음 단계로 넘어가기 위해 만족해야 할 Growth Item 먹은 수
-    requiredPoisonItem = 5; // 다음 단계로 넘어가기 위해 만족해야 할 Poison Item 먹은 수
-    requiredGate = 5;       // 다음 단계로 넘어가기 위해 만족해야 할 Gate 통과 횟수
+    requiredLength = 0 * level;     // 다음 단계로 넘어가기 위해 만족해야 할 뱀의 길이
+    requiredGrowthItem = 1 * level; // 다음 단계로 넘어가기 위해 만족해야 할 Growth Item 먹은 수
+    requiredPoisonItem = 0 * level; // 다음 단계로 넘어가기 위해 만족해야 할 Poison Item 먹은 수
+    requiredGate = 0 * level;       // 다음 단계로 넘어가기 위해 만족해야 할 Gate 통과 횟수
 
     scoreGrowthItem = 0;
     scorePoisonItem = 0;
@@ -49,12 +53,14 @@ snakeGame::snakeGame()
     direction = 'l';
     growthItemTimer = 0;
     poisonItemTimer = 0;
+    speedItemTimer = 0;
     gateTimer = 0;
     srand(time(NULL));
 
     InitGameWindow();
     PositionGrowth();
     PositionPoison();
+    PositionSpeed();
     DrawWindow();
     DrawSnake();
     PrintScore();
@@ -132,9 +138,9 @@ void snakeGame::DrawWindow()
         attroff(COLOR_PAIR(3));
         refresh();
     }
-
     for (int i = 15; i < maxheight / 2 + 2; i++) // draws "중간벽 ㅣ"
     {
+        wall.push_back(CharPosition((maxwidth - 12) / 2 - 10, i));
         start_color();
         init_pair(3, COLOR_WHITE, COLOR_WHITE);
         attron(COLOR_PAIR(3));
@@ -146,6 +152,7 @@ void snakeGame::DrawWindow()
 
     for (int i = (maxwidth - 12) / 2 - 10; i < maxwidth / 2 + 1; i++) // draws "중간벽 ㅡ"
     {
+        wall.push_back(CharPosition(i, maxheight / 2 + 1));
         start_color();
         init_pair(3, COLOR_WHITE, COLOR_WHITE);
         attron(COLOR_PAIR(3));
@@ -193,13 +200,33 @@ void snakeGame::PrintScore()
     move(0, maxwidth - 11);
     printw("Score Board");
     move(1, maxwidth - 11);
-    printw("B:(%d)/(%d)", currentLength, requiredLength);
+    printw("B:(%d)", currentLength);
     move(2, maxwidth - 11);
-    printw("+:(%d)/(%d)", scoreGrowthItem, requiredGrowthItem);
+    printw("+:(%d)", scoreGrowthItem);
     move(3, maxwidth - 11);
-    printw("-:(%d)/(%d)", scorePoisonItem, requiredPoisonItem);
+    printw("-:(%d)", scorePoisonItem);
     move(4, maxwidth - 11);
-    printw("G:(%d)/(%d)", scoreGate, requiredGate);
+    printw("G:(%d)", scoreGate);
+
+    move(6, maxwidth - 11);
+    printw("Mission");
+    move(7, maxwidth - 11);
+    printw("B:(%d)", requiredLength - currentLength);
+    move(8, maxwidth - 11);
+    printw("+:(%d)", requiredGrowthItem - scoreGrowthItem);
+    move(9, maxwidth - 11);
+    printw("-:(%d)", requiredPoisonItem - scorePoisonItem);
+    move(10, maxwidth - 11);
+    printw("G:(%d)", requiredGate - scoreGate);
+}
+
+bool snakeGame::NextStage()
+{
+    if (currentLength >= requiredLength && scoreGrowthItem >= requiredGrowthItem && scorePoisonItem >= requiredPoisonItem && scoreGate >= requiredGate)
+    {
+        return true;
+    }
+    return false;
 }
 
 void snakeGame::PositionGate()
@@ -211,8 +238,6 @@ void snakeGame::PositionGate()
     {
         gate_idx2 = rand() % wall.size();
     }
-    wall.erase(wall.begin() + gate_idx1);
-    wall.erase(wall.begin() + gate_idx2);
     gate_1 = wall[gate_idx1];
     gate_2 = wall[gate_idx2];
     start_color();
@@ -231,8 +256,6 @@ void snakeGame::gateTime()
     gateTimer++;
     if (gateTimer % gateChange == 0)
     {
-        wall.push_back(CharPosition(gate_1.x, gate_1.y));
-        wall.push_back(CharPosition(gate_2.x, gate_2.y)); // wall 벡터에 다시 추가
         attron(COLOR_PAIR(3));
         move(gate_1.y, gate_1.x);
         addch(edgechar);
@@ -258,7 +281,6 @@ void snakeGame::PositionGrowth()
     {
         tmpy = rand() % (maxheight - 2) + 1;
     }
-
     growthItem.x = tmpx;
     growthItem.y = tmpy;
 
@@ -280,6 +302,7 @@ void snakeGame::PositionGrowth()
     attroff(COLOR_PAIR(1));
     refresh();
 }
+
 void snakeGame::growthItemTime()
 {
     growthItemTimer++;
@@ -291,20 +314,29 @@ void snakeGame::growthItemTime()
         growthItemTimer = 0;
     }
 }
+
 void snakeGame::PositionPoison()
 {
-    int tmpx1 = rand() % (maxwidth - 13) + 1; // +1 to avoid the 0
-    int tmpy1 = rand() % (maxheight - 2) + 1;
+    int tmpx = rand() % (maxwidth - 13) + 1;                         // +1 to avoid the 0
+    while (tmpx >= (maxwidth - 12) / 2 - 10 && tmpx <= maxwidth / 2) // 중간 벽을 피함
+    {
+        tmpx = rand() % (maxwidth - 13) + 1;
+    }
+    int tmpy = rand() % (maxheight - 2) + 1;
+    while (tmpy >= 15 && tmpy <= maxheight / 2 + 1) // 중간 벽을 피함
+    {
+        tmpy = rand() % (maxheight - 2) + 1;
+    }
 
-    poisonItem.x = tmpx1;
-    poisonItem.y = tmpy1;
+    poisonItem.x = tmpx;
+    poisonItem.y = tmpy;
 
     for (int i = 0; i < snake.size(); i++)
     {
-        if (snake[i].x == tmpx1 && snake[i].y == tmpy1)
+        if (snake[i].x == tmpx && snake[i].y == tmpy)
         {
-            poisonItem.x = tmpx1;
-            poisonItem.y = tmpy1;
+            poisonItem.x = tmpx;
+            poisonItem.y = tmpy;
         }
     }
     start_color();
@@ -315,6 +347,7 @@ void snakeGame::PositionPoison()
     attroff(COLOR_PAIR(2));
     refresh();
 }
+
 void snakeGame::poisonItemTime() // poisonItem의 위치가 바뀜
 {
     poisonItemTimer++;
@@ -327,19 +360,63 @@ void snakeGame::poisonItemTime() // poisonItem의 위치가 바뀜
     }
 }
 
+void snakeGame::PositionSpeed()
+{
+    int tmpx = rand() % (maxwidth - 13) + 1;                         // +1 to avoid the 0
+    while (tmpx >= (maxwidth - 12) / 2 - 10 && tmpx <= maxwidth / 2) // 중간 벽을 피함
+    {
+        tmpx = rand() % (maxwidth - 13) + 1;
+    }
+    int tmpy = rand() % (maxheight - 2) + 1;
+    while (tmpy >= 15 && tmpy <= maxheight / 2 + 1) // 중간 벽을 피함
+    {
+        tmpy = rand() % (maxheight - 2) + 1;
+    }
+
+    speedItem.x = tmpx;
+    speedItem.y = tmpy;
+
+    for (int i = 0; i < snake.size(); i++)
+    {
+        if (snake[i].x == tmpx && snake[i].y == tmpy)
+        {
+            speedItem.x = tmpx;
+            speedItem.y = tmpy;
+        }
+    }
+    start_color();
+    init_pair(6, COLOR_WHITE, COLOR_YELLOW);
+    attron(COLOR_PAIR(6));
+    move(speedItem.y, speedItem.x);
+    addch(speedItemchar);
+    attroff(COLOR_PAIR(6));
+    refresh();
+}
+
+void snakeGame::speedItemTime() // poisonItem의 위치가 바뀜
+{
+    speedItemTimer++;
+    if (speedItemTimer % itemChange == 0)
+    {
+        move(speedItem.y, speedItem.x);
+        printw(" ");
+        PositionSpeed();
+        speedItemTimer = 0;
+    }
+}
+
 // set game over situations
 bool snakeGame::FatalCollision() // 이름 바꿔야 할 듯, 스네이크 길이 미만 조건도 포함되어 있으니...
 {
-    bool cWall = false;
-
-    // if the snake hits the edge of the window
-    if (snake[0].x == 0 || snake[0].x == maxwidth - 12 || snake[0].y == 0 || snake[0].y == maxheight - 1 ||
-        (snake[0].x == (maxwidth - 12) / 2 - 10 && snake[0].y >= 15 && snake[0].y <= maxheight / 2 + 1) ||
-        (snake[0].y == maxheight / 2 + 1 && snake[0].x >= (maxwidth - 12) / 2 - 10 && snake[0].x <= maxwidth / 2)) // 중간에 있는 벽에 부딫히면 끝
+    for (int i = 0; i < wall.size(); i++)
     {
-        if (!((snake[0].x == gate_1.x && snake[0].y == gate_1.y) || (snake[0].x == gate_2.x && snake[0].y == gate_2.y)))
+        if (snake[0].x == wall[i].x && snake[0].y == wall[i].y)
         {
-            return true;
+            if (!((snake[0].x == gate_1.x && snake[0].y == gate_1.y) || (snake[0].x == gate_2.x && snake[0].y == gate_2.y)))
+            {
+                return true;
+                break;
+            }
         }
     }
 
@@ -416,6 +493,7 @@ bool snakeGame::GetsGrowth()
         return bEatsGrowth = false;
     }
 }
+
 bool snakeGame::GetsPoison()
 {
     if (snake[0].x == poisonItem.x && snake[0].y == poisonItem.y)
@@ -431,6 +509,155 @@ bool snakeGame::GetsPoison()
     {
         return bEatsPoison = false;
     }
+}
+
+int snakeGame::GetsSpeed()
+{
+
+    if (snake[0].x == speedItem.x && snake[0].y == speedItem.y)
+    {
+        speedItemTimer = 0;
+        PositionSpeed();
+        speed -= 10000;
+        return speed;
+    }
+    return speed;
+}
+
+char snakeGame::getWarpDirection(char d, CharPosition gate)
+{
+    char result;
+    // 매개변수로 들어오는 gate에 좌측, 위쪽, 우측, 아래쪽의 CharPosition 객체를 생성
+    CharPosition leftBlock(gate.x - 1, gate.y);
+    CharPosition rightBlock(gate.x + 1, gate.y);
+    CharPosition upBlock(gate.x, gate.y - 1);
+    CharPosition downBlock(gate.x, gate.y + 1);
+
+    // 각각의 방향의 블럭들이 wall인지 아닌지 판단하는 bool 변수 선언
+    bool isLeftWall = false;
+    bool isRightWall = false;
+    bool isUpWall = false;
+    bool isDownWall = false;
+
+    for (int i = 0; i < wall.size(); i++)
+    {
+        if (wall[i].x == leftBlock.x && wall[i].y == leftBlock.y)
+        {
+            isLeftWall = true;
+        }
+        if (wall[i].x == rightBlock.x && wall[i].y == rightBlock.y)
+        {
+            isRightWall = true;
+        }
+        if (wall[i].x == upBlock.x && wall[i].y == upBlock.y)
+        {
+            isUpWall = true;
+        }
+        if (wall[i].x == downBlock.x && wall[i].y == downBlock.y)
+        {
+            isDownWall = true;
+        }
+    }
+
+    // 가장자리인지 판별
+    if (gate.x == 0)
+    {
+        isLeftWall = true;
+    }
+    if (gate.x == maxwidth - 12)
+    {
+        isRightWall = true;
+    }
+    if (gate.y == 0)
+    {
+        isUpWall = true;
+    }
+    if (gate.y == maxheight - 1)
+    {
+        isDownWall = true;
+    }
+
+    // 들어온 방향에 따라 나가는 방향을 지정
+    if (d == 'l')
+    {
+        if (!isLeftWall)
+        {
+            result = 'l';
+        }
+        else if (!isUpWall)
+        {
+            result = 'u';
+        }
+        else if (!isRightWall)
+        {
+            result = 'r';
+        }
+        else
+        {
+            result = 'd';
+        }
+    }
+
+    if (d == 'u')
+    {
+        if (!isUpWall)
+        {
+            result = 'u';
+        }
+        else if (!isRightWall)
+        {
+            result = 'r';
+        }
+        else if (!isDownWall)
+        {
+            result = 'd';
+        }
+        else
+        {
+            result = 'l';
+        }
+    }
+
+    if (d == 'r')
+    {
+        if (!isRightWall)
+        {
+            result = 'r';
+        }
+        else if (!isDownWall)
+        {
+            result = 'd';
+        }
+        else if (!isLeftWall)
+        {
+            result = 'l';
+        }
+        else
+        {
+            result = 'u';
+        }
+    }
+
+    if (d == 'd')
+    {
+        if (!isDownWall)
+        {
+            result = 'd';
+        }
+        else if (!isLeftWall)
+        {
+            result = 'l';
+        }
+        else if (!isUpWall)
+        {
+            result = 'u';
+        }
+        else
+        {
+            result = 'r';
+        }
+    }
+    return result;
 }
 
 // define snake's movements
@@ -517,48 +744,42 @@ void snakeGame::MoveSnake()
     if (bAtGate_1)
     {
         bAtGate_1 = false;
-        if (gate_2.x == 0) // 좌측 가장자리 벽
+        direction = getWarpDirection(direction, gate_2);
+        if (direction == 'r')
         {
-            direction = 'r';
             snake[0] = CharPosition(gate_2.x + 1, gate_2.y);
         }
-        else if (gate_2.x == maxwidth - 12) // 우측 가장자리 벽
+        else if (direction == 'l')
         {
-            direction = 'l';
             snake[0] = CharPosition(gate_2.x - 1, gate_2.y);
         }
-        else if (gate_2.y == 0) // 위쪽 가장자리 벽
+        else if (direction == 'd')
         {
-            direction = 'd';
             snake[0] = CharPosition(gate_2.x, gate_2.y + 1);
         }
-        else if (gate_2.y == maxheight - 1) // 아래쪽 가장자리 벽
+        else if (direction == 'u')
         {
-            direction = 'u';
             snake[0] = CharPosition(gate_2.x, gate_2.y - 1);
         }
     }
     else if (bAtGate_2)
     {
         bAtGate_2 = false;
-        if (gate_1.x == 0) // 좌측 가장자리 벽
+        direction = getWarpDirection(direction, gate_1);
+        if (direction == 'r')
         {
-            direction = 'r';
             snake[0] = CharPosition(gate_1.x + 1, gate_1.y);
         }
-        else if (gate_1.x == maxwidth - 12) // 우측 가장자리 벽
+        else if (direction == 'l')
         {
-            direction = 'l';
             snake[0] = CharPosition(gate_1.x - 1, gate_1.y);
         }
-        else if (gate_1.y == 0) // 위쪽 가장자리 벽
+        else if (direction == 'd')
         {
-            direction = 'd';
             snake[0] = CharPosition(gate_1.x, gate_1.y + 1);
         }
-        else if (gate_1.y == maxheight - 1) // 아래쪽 가장자리 벽
+        else if (direction == 'u')
         {
-            direction = 'u';
             snake[0] = CharPosition(gate_1.x, gate_1.y - 1);
         }
     }
@@ -570,31 +791,43 @@ void snakeGame::MoveSnake()
     return;
 }
 
+bool snakeGame::getClear()
+{
+    return isClear;
+}
+
 void snakeGame::PlayGame()
 {
-    while (1)
+    isClear = true;
+    while (!NextStage())
     {
         if (FatalCollision())
         {
-            move((maxheight - 2) / 2, (maxwidth - 5) / 2);
+            move((maxheight - 2) / 2, (maxwidth - 20) / 2);
             printw("GAME OVER");
             endwin();
+            isClear = false;
             break;
         }
-
         GetsGrowth();
         GetsPoison();
+        GetsSpeed();
         GetsGate();
         growthItemTime();
         poisonItemTime();
+        speedItemTime();
         gateTime();
         MoveSnake();
-
         if (direction == 'q') //exit
         {
             break;
         }
-
         usleep(speed); // delay
+    }
+    if (isClear)
+    {
+        move((maxheight - 2) / 2, (maxwidth - 30) / 2);
+        printw("Mission Complete");
+        endwin();
     }
 }
