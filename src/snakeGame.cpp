@@ -462,6 +462,7 @@ char snakeGame::getWarpDirection(char d, CharPosition gate)
     bool isUpWall = false;
     bool isDownWall = false;
 
+    // 각각의 방향의 블럭들이 wall인지 검사
     for (int i = 0; i < wall.size(); i++)
     {
         if (wall[i].x == leftBlock.x && wall[i].y == leftBlock.y)
@@ -482,6 +483,7 @@ char snakeGame::getWarpDirection(char d, CharPosition gate)
         }
     }
 
+    // 절대 벽을 위한 케이스 고려
     if ((leftBlock.x == 0 && leftBlock.y == 0) || (leftBlock.x == 0 && leftBlock.y == maxheight - 1))
     {
         isLeftWall = true;
