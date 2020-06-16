@@ -31,10 +31,10 @@ snakeGame::snakeGame(int level)
     poisonItem.y = 0;
     currentLength = 3;
 
-    requiredLength = 5 * level;     // 다음 단계로 넘어가기 위해 만족해야 할 뱀의 길이
-    requiredGrowthItem = 1 * level; // 다음 단계로 넘어가기 위해 만족해야 할 Growth Item 먹은 수
-    requiredPoisonItem = 1 * level; // 다음 단계로 넘어가기 위해 만족해야 할 Poison Item 먹은 수
-    requiredGate = 1 * level;       // 다음 단계로 넘어가기 위해 만족해야 할 Gate 통과 횟수
+    requiredLength = 4 * level;     // 다음 단계로 넘어가기 위해 만족해야 할 뱀의 길이
+    requiredGrowthItem = 0 * level; // 다음 단계로 넘어가기 위해 만족해야 할 Growth Item 먹은 수
+    requiredPoisonItem = 0 * level; // 다음 단계로 넘어가기 위해 만족해야 할 Poison Item 먹은 수
+    requiredGate = 0 * level;       // 다음 단계로 넘어가기 위해 만족해야 할 Gate 통과 횟수
 
     scoreGrowthItem = 0;
     scorePoisonItem = 0;
@@ -558,7 +558,7 @@ void snakeGame::MoveSnake()
     return;
 }
 
-int snakeGame::PlayGame()
+bool snakeGame::PlayGame()
 {
     while (NextStage())
     {
@@ -567,7 +567,7 @@ int snakeGame::PlayGame()
             move((maxheight - 2) / 2, (maxwidth - 5) / 2);
             printw("GAME OVER");
             endwin();
-            return 0;
+            return false;
         }
 
         GetsGrowth();
@@ -583,4 +583,5 @@ int snakeGame::PlayGame()
         }
         usleep(speed); // delay
     }
+    return true;
 }

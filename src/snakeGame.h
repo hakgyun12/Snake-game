@@ -46,6 +46,7 @@ private:
     void MoveSnake();
     bool GetsGrowth();
     bool GetsPoison();
+    void GetsItem();
     bool GetsGate();
     void growthItemTime();
     void poisonItemTime();
@@ -54,7 +55,7 @@ private:
 public:
     snakeGame(int level);
     ~snakeGame(); // destructor for cleanup and memory deallocation
-    int PlayGame();
+    bool PlayGame();
 };
 
 #endif

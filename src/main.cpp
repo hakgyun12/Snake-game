@@ -4,6 +4,7 @@ This is handling all user interaction. For game logic, please see snakeGame.h.
 */
 
 #include "snakeGame.h"
+#include <unistd.h>
 
 // Unreal standards
 
@@ -17,33 +18,15 @@ int UserInput();
 
 int main()
 {
-    int a = 1;
     int level = 1;
     bool checked = true;
     if (IsUserReady() == 'y') // wait for confirmation of the user
     {
-        while (a)
+        do
         {
             snakeGame NewSnake(level++);
-            NewSnake.PlayGame();
-            if (a == 1)
-            {
-                if (AskUserToPlayContinue() == 'y')
-                    continue;
-            }
-            else if (a == 0)
-            {
-                if (AskUserToPlayAgain() == 'y')
-                {
-                    a = 1;
-                    level = 1;
-                }
-                else
-                {
-                    a = 0;
-                }
-            }
-        }
+            checked = NewSnake.PlayGame();
+        } while (AskUserToPlayContinue() == 'y');
     }
     return 0;
 }
@@ -80,14 +63,14 @@ int IsUserReady()
 // print end of the game menu and ask user to play again
 int AskUserToPlayAgain()
 {
-    ClearCentre(2.5, 2.5);
+    ClearCentre(3, 2.5);
     printw("Do you want to play again? (y/n)");
     return UserInput();
 }
 
 int AskUserToPlayContinue()
 {
-    ClearCentre(2.5, 2.5);
+    ClearCentre(3, 2.5);
     printw("Mission Complete Do you want to play Continue? (y/n)");
     return UserInput();
 }
