@@ -32,8 +32,9 @@ private:
     std::vector<CharPosition> snake;     // represent the snake's body
     std::vector<CharPosition> wall;
     CharPosition gate_1, gate_2;
+    bool isClear;
 
-    void InitGameWindow();
+    void InitGameWindow(int level);
     void DrawWindow();
     void DrawSnake();
     void PrintScore();
@@ -51,11 +52,13 @@ private:
     void growthItemTime();
     void poisonItemTime();
     void gateTime();
+    char getWarpDirection(char d, CharPosition gate);
 
 public:
     snakeGame(int level);
     ~snakeGame(); // destructor for cleanup and memory deallocation
-    bool PlayGame();
+    void PlayGame();
+    bool getClear();
 };
 
 #endif

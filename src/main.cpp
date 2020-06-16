@@ -11,22 +11,27 @@ This is handling all user interaction. For game logic, please see snakeGame.h.
 int maxheight, maxwidth;
 void PlayGame();
 int IsUserReady();
-int AskUserToPlayAgain();
+int AskUserToPlayAgain(bool clear);
 int AskUserToPlayContinue();
 void ClearCentre();
 int UserInput();
 
 int main()
 {
+    bool isClear;
     int level = 1;
-    bool checked = true;
     if (IsUserReady() == 'y') // wait for confirmation of the user
     {
         do
         {
             snakeGame NewSnake(level++);
-            checked = NewSnake.PlayGame();
-        } while (AskUserToPlayContinue() == 'y');
+            NewSnake.PlayGame();
+            isClear = NewSnake.getClear();
+            if (!isClear)
+            {
+                level = 1;
+            }
+        } while (AskUserToPlayAgain(isClear) == 'y');
     }
     return 0;
 }
@@ -55,22 +60,22 @@ int UserInput()
 // print start menu
 int IsUserReady()
 {
-    ClearCentre(3, 2.5);
+    ClearCentre(3.5, 2.5);
     printw("Welcome to the Snake Game. Are you ready? (y/n)");
     return UserInput();
 }
 
 // print end of the game menu and ask user to play again
-int AskUserToPlayAgain()
+int AskUserToPlayAgain(bool clear)
 {
-    ClearCentre(3, 2.5);
-    printw("Do you want to play again? (y/n)");
-    return UserInput();
-}
-
-int AskUserToPlayContinue()
-{
-    ClearCentre(3, 2.5);
-    printw("Mission Complete Do you want to play Continue? (y/n)");
+    ClearCentre(2.8, 2.5);
+    if (clear)
+    {
+        printw("Mission Complete! Do you want to play Continue? (y/n)");
+    }
+    else
+    {
+        printw("Do you want to play again? (y/n)");
+    }
     return UserInput();
 }
