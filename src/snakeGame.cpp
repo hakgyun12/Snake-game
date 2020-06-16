@@ -40,7 +40,7 @@ snakeGame::snakeGame(int level)
     scoreGrowthItem = 0;
     scorePoisonItem = 0;
     scoreGate = 0;
-    speed = 100000;
+    speed = 50000;
     itemChange = 80; // 뱀이 아무것도 먹지 않을 때 아이템 위치가 대기하는 시간
     gateChange = 100;
     bEatsGrowth = 0;
@@ -480,6 +480,23 @@ char snakeGame::getWarpDirection(char d, CharPosition gate)
         {
             isDownWall = true;
         }
+    }
+
+    if ((leftBlock.x == 0 && leftBlock.y == 0) || (leftBlock.x == 0 && leftBlock.y == maxheight - 1))
+    {
+        isLeftWall = true;
+    }
+    if ((rightBlock.x == maxwidth - 12 && rightBlock.y == 0) || (rightBlock.x == maxwidth - 12 && rightBlock.y == maxheight - 1))
+    {
+        isRightWall = true;
+    }
+    if ((upBlock.x == 0 && upBlock.y == 0) || (upBlock.x == maxwidth - 12 && upBlock.y == 0))
+    {
+        isUpWall = true;
+    }
+    if ((downBlock.x == 0 && downBlock.y == maxheight - 1) || (downBlock.x == maxwidth - 12 && downBlock.y == maxheight - 1))
+    {
+        isDownWall = true;
     }
 
     // 가장자리인지 판별
