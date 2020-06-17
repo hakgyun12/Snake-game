@@ -407,8 +407,80 @@ void snakeGame::DrawWindow()
         refresh();
     }
     break;
+    
+    default:
+    for (int i = 1; i < maxwidth - 12; i++) // draws top
+    {
+        wall.push_back(CharPosition(i, 0));
+        start_color();
+        init_pair(3, COLOR_WHITE, COLOR_WHITE);
+        attron(COLOR_PAIR(3));
+        move(0, i);
+        addch(edgechar);
+        attroff(COLOR_PAIR(3));
+        refresh();
     }
-        
+
+    for (int i = 1; i < maxwidth - 12; i++) // draws bottom
+    {
+        wall.push_back(CharPosition(i, maxheight - 1));
+        start_color();
+        init_pair(3, COLOR_WHITE, COLOR_WHITE);
+        attron(COLOR_PAIR(3));
+        move(maxheight - 1, i);
+        addch(edgechar);
+        attroff(COLOR_PAIR(3));
+        refresh();
+    }
+
+    for (int i = 1; i < maxheight - 1; i++) // draws left side
+    {
+        wall.push_back(CharPosition(0, i));
+        start_color();
+        init_pair(3, COLOR_WHITE, COLOR_WHITE);
+        attron(COLOR_PAIR(3));
+        move(i, 0);
+        addch(edgechar);
+        attroff(COLOR_PAIR(3));
+        refresh();
+    }
+
+    for (int i = 1; i < maxheight - 1; i++) // draws right side
+    {
+        wall.push_back(CharPosition(maxwidth - 12, i));
+        start_color();
+        init_pair(3, COLOR_WHITE, COLOR_WHITE);
+        attron(COLOR_PAIR(3));
+        move(i, maxwidth - 12);
+        addch(edgechar);
+        attroff(COLOR_PAIR(3));
+        refresh();
+    }
+    for (int i = 15; i < maxheight / 2 + 2; i++) // draws "중간벽 ㅣ"
+    {
+        wall.push_back(CharPosition((maxwidth - 12) / 2 - 10, i));
+        start_color();
+        init_pair(3, COLOR_WHITE, COLOR_WHITE);
+        attron(COLOR_PAIR(3));
+        move(i, (maxwidth - 12) / 2 - 10);
+        addch(edgechar);
+        attroff(COLOR_PAIR(3));
+        refresh();
+    }
+
+    for (int i = (maxwidth - 12) / 2 - 10; i < maxwidth / 2 + 1; i++) // draws "중간벽 ㅡ"
+    {
+        wall.push_back(CharPosition(i, maxheight / 2 + 1));
+        start_color();
+        init_pair(3, COLOR_WHITE, COLOR_WHITE);
+        attron(COLOR_PAIR(3));
+        move(maxheight / 2 + 1, i);
+        addch(edgechar);
+        attroff(COLOR_PAIR(3));
+        refresh();
+    }
+    break;
+    }   
 
     // 모서리 부분을 다른 색으로 표시
     start_color();
@@ -424,6 +496,7 @@ void snakeGame::DrawWindow()
     addch(edgechar);
     attroff(COLOR_PAIR(4));
     refresh();
+    
 }
 
 // draw snake's body
