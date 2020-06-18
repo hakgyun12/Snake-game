@@ -1,0 +1,65 @@
+#include <iostream>
+#include <vector>
+#include <ncurses.h>
+#include <cstdlib>
+#include <ctime>
+
+#ifndef SNAKEGAME_H
+#define SNAKEGAME_H
+// Unreal standards
+
+struct CharPosition
+{
+    int x, y;
+    CharPosition(int col, int row);
+    CharPosition();
+};
+
+class snakeGame
+{
+private:
+    int speed, itemChange, maxwidth, maxheight, gateChange;
+    int stageNumber; //스테이지 바꿔주는 변수
+    char direction, partchar, edgechar, growthItemchar, poisonItemchar;
+    // partchar is the character representing the snake's body
+    // edgechar is the character representing the edge of the game window
+    // growthItemchar is the character representing the growthItem
+    // del stands for delay
+    int scoreGrowthItem, scorePoisonItem, scoreGate, currentLength;
+    int growthItemTimer, poisonItemTimer, gateTimer; // maxLength 필요 없어 보임
+    int requiredLength, requiredGrowthItem, requiredPoisonItem, requiredGate;
+    bool bEatsGrowth, bEatsPoison, bAtGate_1, bAtGate_2;
+    CharPosition growthItem, poisonItem; // need to clarify this combination
+    std::vector<CharPosition> snake;     // represent the snake's body
+    std::vector<CharPosition> wall;
+    CharPosition gate_1, gate_2;
+    bool isClear;
+
+    void InitGameWindow(int level);
+    void DrawWindow();
+    void DrawSnake();
+    void PrintScore();
+    bool NextStage();
+    //bool CheckNextStage();
+    void PositionGrowth();
+    void PositionPoison();
+    void PositionGate();
+    bool FatalCollision();
+    void MoveSnake();
+    bool GetsGrowth();
+    bool GetsPoison();
+    void GetsItem();
+    bool GetsGate();
+    void growthItemTime();
+    void poisonItemTime();
+    void gateTime();
+    char getWarpDirection(char d, CharPosition gate);
+
+public:
+    snakeGame(int level);
+    ~snakeGame(); // destructor for cleanup and memory deallocation
+    void PlayGame();
+    bool getClear();
+};
+
+#endif
