@@ -12,7 +12,7 @@ int maxheight, maxwidth;
 void PlayGame();
 int IsUserReady();
 int AskUserToPlayAgain(bool clear);
-int AskUserToPlayContinue();
+int AllClear();
 void ClearCentre();
 int UserInput();
 
@@ -31,7 +31,12 @@ int main()
             {
                 level = 1;
             }
-        } while (AskUserToPlayAgain(isClear) == 'y');
+        } while (AskUserToPlayAgain(isClear) == 'y' && level <= 4);
+
+        if (level == 5)
+        {
+            AllClear();
+        }
     }
     return 0;
 }
@@ -68,14 +73,23 @@ int IsUserReady()
 // print end of the game menu and ask user to play again
 int AskUserToPlayAgain(bool clear)
 {
-    ClearCentre(2.8, 2.5);
+
     if (clear)
     {
+        ClearCentre(3.2, 2.5);
         printw("Mission Complete! Do you want to play Continue? (y/n)");
     }
     else
     {
+        ClearCentre(2.8, 2.5);
         printw("Do you want to play again? (y/n)");
     }
+    return UserInput();
+}
+
+int AllClear()
+{
+    ClearCentre(3.2, 2.5);
+    printw("Congratuation! All Clear!");
     return UserInput();
 }

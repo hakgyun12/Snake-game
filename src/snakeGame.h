@@ -19,14 +19,13 @@ class snakeGame
 {
 private:
     int speed, itemChange, maxwidth, maxheight, gateChange;
-    char direction, partchar, edgechar, growthItemchar, poisonItemchar, speedItemchar;
-    // partchar is the character representing the snake's body
+    char direction, partchar, edgechar, growthItemchar, poisonItemchar, speedItemchar; // partchar is the character representing the snake's body
     // edgechar is the character representing the edge of the game window
     // growthItemchar is the character representing the growthItem
     // del stands for delay
-    int scoreGrowthItem, scorePoisonItem, scoreGate, currentLength;
+    int scoreGrowthItem, scorePoisonItem, scoreGate, scoreSpeedItem, currentLength;
     int growthItemTimer, poisonItemTimer, speedItemTimer, gateTimer; // maxLength 필요 없어 보임
-    int requiredLength, requiredGrowthItem, requiredPoisonItem, requiredGate;
+    int requiredLength, requiredGrowthItem, requiredPoisonItem, requiredGate, requiredSpeedItem;
     bool bEatsGrowth, bEatsPoison, bAtGate_1, bAtGate_2;
     CharPosition growthItem, poisonItem, speedItem; // need to clarify this combination
     std::vector<CharPosition> snake;                // represent the snake's body
