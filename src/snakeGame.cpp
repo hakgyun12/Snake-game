@@ -44,8 +44,8 @@ snakeGame::snakeGame(int level)
     scorePoisonItem = 0;
     scoreGate = 0;
     speed = 50000;
-    itemChange = 80; // 뱀이 아무것도 먹지 않을 때 아이템 위치가 대기하는 시간
-    gateChange = 100;
+    itemChange = 120; // 뱀이 아무것도 먹지 않을 때 아이템 위치가 대기하는 시간
+    gateChange = 120;
     bEatsGrowth = 0;
     bEatsPoison = 0;
     bAtGate_1 = 0;
@@ -58,13 +58,13 @@ snakeGame::snakeGame(int level)
     srand(time(NULL));
 
     InitGameWindow(level);
+    DrawWindow(level);
     PositionGrowth();
     PositionPoison();
     PositionSpeed();
-    DrawWindow();
+    PositionGate();
     DrawSnake();
     PrintScore();
-    PositionGate();
     refresh();
 }
 
@@ -90,7 +90,7 @@ void snakeGame::InitGameWindow(int level)
 }
 
 // draw the game window
-void snakeGame::DrawWindow()
+void snakeGame::DrawWindow(int level)
 {
     for (int i = 1; i < maxwidth - 12; i++) // draws top
     {
@@ -139,28 +139,167 @@ void snakeGame::DrawWindow()
         attroff(COLOR_PAIR(3));
         refresh();
     }
-    for (int i = 15; i < maxheight / 2 + 2; i++) // draws "중간벽 ㅣ"
-    {
-        wall.push_back(CharPosition((maxwidth - 12) / 2 - 10, i));
-        start_color();
-        init_pair(3, COLOR_WHITE, COLOR_WHITE);
-        attron(COLOR_PAIR(3));
-        move(i, (maxwidth - 12) / 2 - 10);
-        addch(edgechar);
-        attroff(COLOR_PAIR(3));
-        refresh();
-    }
 
-    for (int i = (maxwidth - 12) / 2 - 10; i < maxwidth / 2 + 1; i++) // draws "중간벽 ㅡ"
+    switch (level)
     {
-        wall.push_back(CharPosition(i, maxheight / 2 + 1));
-        start_color();
-        init_pair(3, COLOR_WHITE, COLOR_WHITE);
-        attron(COLOR_PAIR(3));
-        move(maxheight / 2 + 1, i);
-        addch(edgechar);
-        attroff(COLOR_PAIR(3));
-        refresh();
+    case 1:
+        for (int i = 1; i < maxheight - 2; i++) // draws top left
+        {
+            if (i % 6 == 0)
+            {
+                for (int j = 6; j < (maxwidth - 12) / 2 - 3; j++)
+                {
+                    wall.push_back(CharPosition(j, i));
+                    start_color();
+                    init_pair(3, COLOR_WHITE, COLOR_WHITE);
+                    attron(COLOR_PAIR(3));
+                    move(i, j);
+                    addch(edgechar);
+                    attroff(COLOR_PAIR(3));
+                    refresh();
+                }
+                for (int j = (maxwidth - 12) / 2 + 3; j < maxwidth - 17; j++)
+                {
+                    wall.push_back(CharPosition(j, i));
+                    start_color();
+                    init_pair(3, COLOR_WHITE, COLOR_WHITE);
+                    attron(COLOR_PAIR(3));
+                    move(i, j);
+                    addch(edgechar);
+                    attroff(COLOR_PAIR(3));
+                    refresh();
+                }
+            }
+            else
+            {
+                continue;
+            }
+        }
+        break;
+    case 2:
+        for (int i = 8; i < maxheight / 2 + 2; i++) // draws "중간벽 ㅣ"
+        {
+            wall.push_back(CharPosition((maxwidth - 12) / 2 - 10, i));
+            start_color();
+            init_pair(3, COLOR_WHITE, COLOR_WHITE);
+            attron(COLOR_PAIR(3));
+            move(i, (maxwidth - 12) / 2 - 10);
+            addch(edgechar);
+            attroff(COLOR_PAIR(3));
+            refresh();
+        }
+
+        for (int i = (maxwidth - 12) / 2 - 10; i < maxwidth / 2 + 1; i++) // draws "중간벽 ㅡ"
+        {
+            wall.push_back(CharPosition(i, maxheight / 2 + 1));
+            start_color();
+            init_pair(3, COLOR_WHITE, COLOR_WHITE);
+            attron(COLOR_PAIR(3));
+            move(maxheight / 2 + 1, i);
+            addch(edgechar);
+            attroff(COLOR_PAIR(3));
+            refresh();
+        }
+        break;
+
+    case 3:
+        for (int i = 1; i < maxheight - 2; i++) // draws top left
+        {
+            if (i % 6 == 0)
+            {
+                for (int j = 6; j < (maxwidth - 12) / 2 - 3; j++)
+                {
+                    wall.push_back(CharPosition(j, i));
+                    start_color();
+                    init_pair(3, COLOR_WHITE, COLOR_WHITE);
+                    attron(COLOR_PAIR(3));
+                    move(i, j);
+                    addch(edgechar);
+                    attroff(COLOR_PAIR(3));
+                    refresh();
+                }
+                for (int j = (maxwidth - 12) / 2 + 3; j < maxwidth - 17; j++)
+                {
+                    wall.push_back(CharPosition(j, i));
+                    start_color();
+                    init_pair(3, COLOR_WHITE, COLOR_WHITE);
+                    attron(COLOR_PAIR(3));
+                    move(i, j);
+                    addch(edgechar);
+                    attroff(COLOR_PAIR(3));
+                    refresh();
+                }
+            }
+            else
+            {
+                continue;
+            }
+        }
+        break;
+    case 4:
+        for (int i = 1; i < (maxwidth - 12) / 2; i++) // draws top left
+        {
+            if (i % 2 == 0)
+            {
+                wall.push_back(CharPosition(i, maxheight - 1 - i));
+                start_color();
+                init_pair(3, COLOR_WHITE, COLOR_WHITE);
+                attron(COLOR_PAIR(3));
+                move(maxheight - 1 - i, i);
+                addch(edgechar);
+                attroff(COLOR_PAIR(3));
+                refresh();
+            }
+            else
+            {
+                continue;
+            }
+        }
+        for (int i = (maxwidth - 12) / 2 + 1; i < maxwidth - 12; i++) // draws top right
+        {
+            if (i % 2 == 0)
+            {
+                wall.push_back(CharPosition(i, maxwidth - 13 - i));
+                start_color();
+                init_pair(3, COLOR_WHITE, COLOR_WHITE);
+                attron(COLOR_PAIR(3));
+                move(maxwidth - 13 - i, i);
+                addch(edgechar);
+                attroff(COLOR_PAIR(3));
+                refresh();
+            }
+            else
+            {
+                continue;
+            }
+        }
+        break;
+
+    default:
+        for (int i = 8; i < maxheight / 2 + 2; i++) // draws "중간벽 ㅣ"
+        {
+            wall.push_back(CharPosition((maxwidth - 12) / 2 - 10, i));
+            start_color();
+            init_pair(3, COLOR_WHITE, COLOR_WHITE);
+            attron(COLOR_PAIR(3));
+            move(i, (maxwidth - 12) / 2 - 10);
+            addch(edgechar);
+            attroff(COLOR_PAIR(3));
+            refresh();
+        }
+
+        for (int i = (maxwidth - 12) / 2 - 10; i < maxwidth / 2 + 1; i++) // draws "중간벽 ㅡ"
+        {
+            wall.push_back(CharPosition(i, maxheight / 2 + 1));
+            start_color();
+            init_pair(3, COLOR_WHITE, COLOR_WHITE);
+            attron(COLOR_PAIR(3));
+            move(maxheight / 2 + 1, i);
+            addch(edgechar);
+            attroff(COLOR_PAIR(3));
+            refresh();
+        }
+        break;
     }
 
     // 모서리 부분을 다른 색으로 표시
@@ -201,24 +340,52 @@ void snakeGame::PrintScore()
     move(0, maxwidth - 11);
     printw("Score Board");
     move(1, maxwidth - 11);
-    printw("B:(%d)", currentLength);
+    printw("B : (%d)", currentLength);
     move(2, maxwidth - 11);
-    printw("+:(%d)", scoreGrowthItem);
+    printw("+ : (%d)", scoreGrowthItem);
     move(3, maxwidth - 11);
-    printw("-:(%d)", scorePoisonItem);
+    printw("- : (%d)", scorePoisonItem);
     move(4, maxwidth - 11);
-    printw("G:(%d)", scoreGate);
+    printw("G : (%d)", scoreGate);
 
     move(6, maxwidth - 11);
     printw("Mission");
     move(7, maxwidth - 11);
-    printw("B:(%d)", requiredLength - currentLength);
+    if (requiredLength - currentLength <= 0)
+    {
+        printw("B : (%s)", "v");
+    }
+    else
+    {
+        printw("B : (%d)", requiredLength - currentLength);
+    }
     move(8, maxwidth - 11);
-    printw("+:(%d)", requiredGrowthItem - scoreGrowthItem);
+    if (requiredGrowthItem - scoreGrowthItem <= 0)
+    {
+        printw("+ : (%s)", "v");
+    }
+    else
+    {
+        printw("+ : (%d)", requiredGrowthItem - scoreGrowthItem);
+    }
     move(9, maxwidth - 11);
-    printw("-:(%d)", requiredPoisonItem - scorePoisonItem);
+    if (requiredPoisonItem - scorePoisonItem <= 0)
+    {
+        printw("- : (%s)", "v");
+    }
+    else
+    {
+        printw("- : (%d)", requiredPoisonItem - scorePoisonItem);
+    }
     move(10, maxwidth - 11);
-    printw("G:(%d)", requiredGate - scoreGate);
+    if (requiredGate - scoreGate <= 0)
+    {
+        printw("G : (%s)", "v");
+    }
+    else
+    {
+        printw("G : (%d)", requiredGate - scoreGate);
+    }
 }
 
 bool snakeGame::NextStage()
@@ -601,18 +768,26 @@ char snakeGame::getWarpDirection(char d, CharPosition gate)
     if (gate.x == 0)
     {
         isLeftWall = true;
+        isUpWall = true;
+        isDownWall = true;
     }
     if (gate.x == maxwidth - 12)
     {
         isRightWall = true;
+        isUpWall = true;
+        isDownWall = true;
     }
     if (gate.y == 0)
     {
         isUpWall = true;
+        isRightWall = true;
+        isLeftWall = true;
     }
     if (gate.y == maxheight - 1)
     {
         isDownWall = true;
+        isRightWall = true;
+        isLeftWall = true;
     }
 
     // 들어온 방향에 따라 나가는 방향을 지정

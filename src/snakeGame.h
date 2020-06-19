@@ -35,7 +35,7 @@ private:
     bool isClear;
 
     void InitGameWindow(int level);
-    void DrawWindow();
+    void DrawWindow(int level);
     void DrawSnake();
     void PrintScore();
     bool NextStage();
