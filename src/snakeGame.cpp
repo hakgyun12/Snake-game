@@ -43,7 +43,7 @@ snakeGame::snakeGame(int level)
     scoreGrowthItem = 0;
     scorePoisonItem = 0;
     scoreGate = 0;
-    speed = 50000;
+    speed = 60000;
     itemChange = 120; // 뱀이 아무것도 먹지 않을 때 아이템 위치가 대기하는 시간
     gateChange = 120;
     bEatsGrowth = 0;
