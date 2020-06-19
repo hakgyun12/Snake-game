@@ -19,7 +19,7 @@ class snakeGame
 {
 private:
     int speed, itemChange, maxwidth, maxheight, gateChange;
-    int stageNumber; //스테이지 바꿔주는 변수
+    int stageNumber,j,p,j1,p1; //스테이지 바꿔주는 변수
     char direction, partchar, edgechar, growthItemchar, poisonItemchar;
     // partchar is the character representing the snake's body
     // edgechar is the character representing the edge of the game window
