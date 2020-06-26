@@ -14,21 +14,21 @@ C++ 프로그래밍 언어를 이용하여 Snake Game를 구현하도록 한다!
 
 4. 게임을 진행하면서 4개의 Stage의 Mission을 Clear하도록 한다. 
 
-5. (유의) 충돌하거나 Snake의 길이가 3미만이면 게임이 종료된다!
+5. (유의) 충돌하거나 Snake의 길이가 3미만이면 게임이 종료된다.
 
-6. Stage 4까지 모든 Mission Clear 한다면 성공
+6. Stage 4까지 모든 Mission Clear 한다면 성공한다.
 
 
 
 ## 2. 실행 화면
 
-<img width="365" alt="주석 2020-06-26 164713" src="https://user-images.githubusercontent.com/28584213/85833738-30047a80-b7cd-11ea-8b76-34ffaab23e32.png" style="zoom: 150%;" >
+<img width="365" alt="주석 2020-06-26 164713" src="https://user-images.githubusercontent.com/28584213/85833738-30047a80-b7cd-11ea-8b76-34ffaab23e32.png" style="zoom: 200%;" >
 
-<img width="365" alt="주석 2020-06-26 164641" src="https://user-images.githubusercontent.com/28584213/85833755-3692f200-b7cd-11ea-9fd2-36eeeeb275a7.png" style="zoom:150%;" >
+<img width="365" alt="주석 2020-06-26 164641" src="https://user-images.githubusercontent.com/28584213/85833755-3692f200-b7cd-11ea-9fd2-36eeeeb275a7.png" style="zoom: 200%;" >
 
-<img width="365" alt="주석 2020-06-26 164617" src="https://user-images.githubusercontent.com/28584213/85833756-38f54c00-b7cd-11ea-993b-1050f11055b0.png" style="zoom:150%;" >
-<img width="367" alt="주석 2020-06-26 164810" src="https://user-images.githubusercontent.com/28584213/85833763-3abf0f80-b7cd-11ea-8462-acf2c125639b.png" style="zoom:150%;" >
-<img width="367" alt="주석 2020-06-26 164742" src="https://user-images.githubusercontent.com/28584213/85833776-3dba0000-b7cd-11ea-9d48-88c44fb3c14a.png" style="zoom:150%;" >
+<img width="365" alt="주석 2020-06-26 164617" src="https://user-images.githubusercontent.com/28584213/85833756-38f54c00-b7cd-11ea-993b-1050f11055b0.png" style="zoom: 200%;" >
+<img width="367" alt="주석 2020-06-26 164810" src="https://user-images.githubusercontent.com/28584213/85833763-3abf0f80-b7cd-11ea-8462-acf2c125639b.png" style="zoom: 200%;" >
+<img width="367" alt="주석 2020-06-26 164742" src="https://user-images.githubusercontent.com/28584213/85833776-3dba0000-b7cd-11ea-9d48-88c44fb3c14a.png" style="zoom: 200%;" >
 
 
 
